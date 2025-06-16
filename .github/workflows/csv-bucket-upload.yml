@@ -25,6 +25,6 @@ jobs:
 
       - name: Upload Only New CSVs to GCS
         run: |
-          gsutil rsync -r -n cp data/*.csv gs://cso-exercise-ingestion-raw/
+          gsutil -n cp data/*.csv gs://cso-exercise-ingestion-raw/
 
           
