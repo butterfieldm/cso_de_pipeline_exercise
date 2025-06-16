@@ -3,30 +3,30 @@ name: Terraform Deploy
 on:
   push:
     branches:
-      - main   # or your deployment branch
+      - main
 
 jobs:
   terraform:
+
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0 
 
-    - name: Configure gcloud SDK
-      uses: google-github-actions/setup-gcloud@v1
-      with:
-        service_account_key: ${{ secrets.GCP_PROJECT_KEY }}
-        project_id: your-gcp-project-id
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./gcs-bucket-terraform
 
-    - name: Terraform Init
-      run: terraform init
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan.binary
+        working-directory: ./gcs-bucket-terraform
 
-    - name: Terraform Plan
-      run: terraform plan -out=tfplan
-
-    - name: Terraform Apply
-      run: terraform apply -auto-approve tfplan
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan.binary
+        working-directory: ./gcs-bucket-terraform
