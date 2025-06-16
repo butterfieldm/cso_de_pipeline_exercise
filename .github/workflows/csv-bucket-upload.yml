@@ -1,0 +1,27 @@
+# YAML file to upload new CSV files in the local data/ folder to specified GCS bucket
+
+name: Upload New CSVs to GCS
+
+on:
+  push:
+    paths:
+      - 'data/*.csv' # Only triggers if there's a change in the data/ folder
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest # Github hosted Linux runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate with GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_PROJECT_KEY }}
+
+      - name: Upload Only New CSVs to GCS
+        run: |
+          gsutil -n cp data/*.csv gs://cso-exercise-ingestion-raw/
+
+          
