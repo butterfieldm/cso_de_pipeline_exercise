@@ -6,8 +6,8 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'data/*.csv' # Only triggers if there's a change in the data/ folder
+    # paths:
+    #   - 'data/*.csv' # Only triggers if there's a change in the data/ folder
 
 jobs:
   upload:
