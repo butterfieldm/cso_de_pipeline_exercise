@@ -6,13 +6,10 @@ on:
   push:
     branches:
       - main
-    # paths:
-    #   - 'data/*.csv' # Only triggers if there's a change in the data/ folder
 
 jobs:
   upload:
-
-    runs-on: ubuntu-latest # Github hosted Linux runner
+    runs-on: ubuntu-latest  #Github hosted linux runner
 
     steps:
       - name: Checkout code
@@ -23,8 +20,16 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_PROJECT_KEY }}
 
-      - name: Upload Only New CSVs to GCS
+      - name: Confirm Auth Context
         run: |
-          gsutil rsync -r -n data gs://cso-exercise-ingestion-raw/
+          gcloud auth list
+          gcloud config list
+
+      - name: Upload CSVs to GCS
+        uses: google-github-actions/upload-cloud-storage@v1
+        with:
+          path: data/
+          destination: cso-exercise-ingestion-raw/
+          parent: false
 
           
