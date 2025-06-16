@@ -4,11 +4,14 @@ name: Upload New CSVs to GCS
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'data/*.csv' # Only triggers if there's a change in the data/ folder
 
 jobs:
   upload:
+
     runs-on: ubuntu-latest # Github hosted Linux runner
 
     steps:
