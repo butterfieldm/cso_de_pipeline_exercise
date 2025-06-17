@@ -33,7 +33,7 @@ jobs:
       - name: Deploy pipeline to Dataflow
         run: |
           source lloy_venv/bin/activate
-          python pipeline.py \
+          python pipelines/cso_dataflow_pipeline.py \
             --runner DataflowRunner \
             --project cso-deng-pipeline \
             --region europe-west2 \

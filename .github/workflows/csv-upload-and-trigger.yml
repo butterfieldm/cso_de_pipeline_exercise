@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - 'data/**'
+      - 'schemas/**'
   workflow_dispatch:
 
 jobs:
