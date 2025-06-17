@@ -114,7 +114,13 @@ resource "google_pubsub_topic_iam_member" "allow_gcs_publish" {
   member = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
 
-resource "google_pubsub_topic_iam_member" "allow_gcs_publish" {
+resource "google_pubsub_topic_iam_member" "gcs_publish_permission" {
+  topic    = google_pubsub_topic.gcs_notifications.name
+  role     = "roles/pubsub.publisher"
+  member   = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+}
+
+resource "google_pubsub_topic_iam_member" "allow_gcs_publish_hardcoded_account" {
   topic = google_pubsub_topic.gcs_notifications.name
   role  = "roles/pubsub.publisher"
   member = "serviceAccount:service-452297162236@gs-project-accounts.iam.gserviceaccount.com"
