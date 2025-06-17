@@ -42,13 +42,7 @@ jobs:
           path: data/
           destination: ${{ env.BUCKET_NAME }}/
           parent: false
-
-      - name: Confirm Pub/Sub Subscription is Active
-        run: |
-          echo "Checking Pub/Sub subscription status..."
-          gcloud pubsub subscriptions describe $SUBSCRIPTION_NAME \
-            --project=$PROJECT_ID \
-            --format="table(name,topic,ackDeadlineSeconds)"
+          process_gcloudignore: false 
 
       - name: Confirm Upload Triggered Notification
         run: |
