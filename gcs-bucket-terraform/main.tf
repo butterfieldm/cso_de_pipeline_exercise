@@ -119,3 +119,9 @@ resource "google_pubsub_topic_iam_member" "gcs_publish_permission" {
   role     = "roles/pubsub.publisher"
   member   = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
+
+resource "google_pubsub_topic_iam_member" "allow_gcs_publish" {
+  topic = google_pubsub_topic.gcs_notifications.name
+  role  = "roles/pubsub.publisher"
+  member = "serviceAccount:service-452297162236@gs-project-accounts.iam.gserviceaccount.com"
+}
