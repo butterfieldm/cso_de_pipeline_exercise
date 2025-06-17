@@ -1,0 +1,53 @@
+[
+    {
+      "name": "customer_id",
+      "type": "STRING",
+      "mode": "REQUIRED"
+    },
+    {
+      "name": "first_name",
+      "type": "STRING",
+      "mode": "REQUIRED"
+    },
+    {
+      "name": "last_name",
+      "type": "STRING",
+      "mode": "REQUIRED"
+    },
+    {
+      "name": "email",
+      "type": "STRING",
+      "mode": "NULLABLE"
+    },
+    {
+      "name": "date_of_birth",
+      "type": "DATE",
+      "mode": "REQUIRED"
+    },
+    {
+      "name": "phone",
+      "type": "STRING",
+      "mode": "NULLABLE"
+    },
+    {
+      "name": "city",
+      "type": "STRING",
+      "mode": "NULLABLE"
+    },
+    {
+      "name": "postcode",
+      "type": "STRING",
+      "mode": "REQUIRED"
+    },
+    {
+      "name": "valid_from_dttm",
+      "type": "TIMESTAMP",
+      "mode": "REQUIRED"
+    },
+    {
+      "name": "valid_to_dttm",
+      "type": "TIMESTAMP",
+      "mode": "REQUIRED"
+    }
+  ]
+  
