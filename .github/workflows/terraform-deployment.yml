@@ -28,12 +28,12 @@ jobs:
         with:
           terraform_version: 1.5.0
 
-      - name: Terraform Validate
-        run: terraform validate
-        working-directory: ./gcs-bucket-terraform
-
       - name: Terraform Init
         run: terraform init
+        working-directory: ./gcs-bucket-terraform
+
+      - name: Terraform Validate
+        run: terraform validate
         working-directory: ./gcs-bucket-terraform
 
       - name: Terraform Plan

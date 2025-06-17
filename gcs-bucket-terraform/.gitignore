@@ -1,11 +1,9 @@
 # .gitignore in gcs-bucket-terraform/
 
-# Ignore Terraform state and backup files
-terraform.tfstate
+# Ignore Terraform backup files
 terraform.tfstate.backup
 
 # Ignore variable definitions and secrets
-*.tfvars
 *.json  # (Assumes you might store service account key files)
 
 # Ignore Terraform CLI folders

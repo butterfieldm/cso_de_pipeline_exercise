@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - 'data/**'
+  workflow_dispatch:
 
 jobs:
   upload-and-trigger:

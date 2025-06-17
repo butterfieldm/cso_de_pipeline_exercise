@@ -1,6 +1,9 @@
 name: Deploy Dataflow Pipeline
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -18,8 +21,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
+          python -m venv lloy_venv
+          source lloy_venv/bin/activate
           pip install -r requirements.txt
 
       - name: Authenticate with GCP
@@ -29,7 +32,7 @@ jobs:
 
       - name: Deploy pipeline to Dataflow
         run: |
-          source venv/bin/activate
+          source lloy_venv/bin/activate
           python pipeline.py \
             --runner DataflowRunner \
             --project cso-deng-pipeline \

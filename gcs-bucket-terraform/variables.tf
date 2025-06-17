@@ -13,8 +13,3 @@ variable "bucket_name" {
   description = "The name of the storage bucket"
   type        = string
 }
-
-variable "credentials_file" {
-  type        = string
-  description = "Path to service account JSON key"
-}
