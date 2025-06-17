@@ -89,8 +89,7 @@ resource "google_storage_notification" "notify_uploads" {
 }
 
 resource "google_pubsub_topic" "gcs_upload_topic" {
-  name            = "gcs-file-drop-topic"
-  prevent_destroy = true
+  name = "gcs-file-drop-topic"
 }
 
 resource "google_pubsub_subscription" "gcs_upload_sub" {
@@ -113,4 +112,10 @@ resource "google_pubsub_topic_iam_member" "allow_gcs_publish" {
   topic  = google_pubsub_topic.gcs_notifications.name
   role   = "roles/pubsub.publisher"
   member = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+}
+
+resource "google_pubsub_topic_iam_member" "gcs_publish_permission" {
+  topic    = google_pubsub_topic.gcs_notifications.name
+  role     = "roles/pubsub.publisher"
+  member   = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
