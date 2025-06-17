@@ -7,17 +7,25 @@ on:
 
 jobs:
   terraform:
-
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write  # Needed for GCP auth
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_PROJECT_KEY }}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.0 
+          terraform_version: 1.5.0
 
       - name: Terraform Init
         run: terraform init
