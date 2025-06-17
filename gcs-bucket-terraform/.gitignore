@@ -5,7 +5,6 @@ terraform.tfstate
 terraform.tfstate.backup
 
 # Ignore variable definitions and secrets
-*.tfvars
 *.json  # (Assumes you might store service account key files)
 
 # Ignore Terraform CLI folders
