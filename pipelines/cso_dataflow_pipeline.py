@@ -81,7 +81,7 @@ class ParseAndValidateCSV(beam.DoFn):
         schema = self.get_schema(table_name)
 
         with beam.io.filesystems.FileSystems.open(file_path) as f:
-            lines = [line.decode('utf-8') for line in f.readlines()]
+            lines = [line.decode('utf-8', errors='replace') for line in f.readlines()]
             reader = csv.DictReader(lines)
             for row in reader:
   
