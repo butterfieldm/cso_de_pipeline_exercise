@@ -24,13 +24,27 @@ class ExtractFileInfo(beam.DoFn):
         payload = json.loads(element.decode('utf-8'))
         gcs_path = payload['name']
         filename = os.path.basename(gcs_path)
-        match = re.match(r"(.*)\.csv", filename, re.IGNORECASE)
+
+        # Extract base name from filename: e.g. customers_20250618.csv -> customer
+        match = re.match(r"([a-zA-Z]+)_\d{8}\.csv", filename, re.IGNORECASE)
         if match:
+            raw_table_name = match.group(1).lower()
+            
+            # Manual singularisation for special cases (e.g., customers -> customer)
+            table_name_mapping = {
+                'customers': 'customer',
+                'transactions': 'transaction',
+                # Add more mappings if needed
+            }
+            table_name = table_name_mapping.get(raw_table_name, raw_table_name)
+
             yield {
                 "filename": filename,
-                "table_name": match.group(1),
+                "table_name": table_name,
                 "gcs_path": f"gs://{payload['bucket']}/{gcs_path}"
             }
+        else:
+            raise ValueError(f"Filename '{filename}' does not match expected format '<table>_YYYYMMDD.csv'")
 
 # === Parse and validate CSVs ===
 class ParseAndValidateCSV(beam.DoFn):
