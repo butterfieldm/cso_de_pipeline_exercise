@@ -33,16 +33,9 @@ class ExtractFileInfo(beam.DoFn):
 
         raw_table_name = match.group(1).lower()
 
-        # Manual mapping (e.g. plural → singular) if needed
-        table_name_mapping = {
-            'customers': 'customer',
-            'transactions': 'transaction',
-        }
-        table_name = table_name_mapping.get(raw_table_name, raw_table_name)
-
         yield {
             "filename": filename,
-            "table_name": table_name,
+            "table_name": raw_table_name,
             "gcs_path": f"gs://{payload['bucket']}/{gcs_path}"
         }
 

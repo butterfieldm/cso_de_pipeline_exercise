@@ -43,6 +43,12 @@ jobs:
           gcloud auth list
           gcloud config list
       
+      - name: Check encoding of CSVs (debug)
+        run: |
+          for file in data/*.csv; do
+            file -i "$file"
+          done
+        
       - name: Upload schema files
         run: |
           gsutil -m cp -r schemas/ gs://cso-exercise-ingestion-raw/
