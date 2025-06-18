@@ -33,6 +33,11 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_PROJECT_KEY }}
 
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
       - name: Confirm Auth Context
         run: |
           gcloud auth list
