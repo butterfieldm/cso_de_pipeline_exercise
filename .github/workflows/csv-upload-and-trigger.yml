@@ -37,6 +37,11 @@ jobs:
         run: |
           gcloud auth list
           gcloud config list
+      
+      - name: Upload schema files
+        run: |
+          gsutil -m cp -r schemas/ gs://cso-exercise-ingestion-raw/
+        
 
       - name: Upload CSVs to GCS
         uses: google-github-actions/upload-cloud-storage@v1

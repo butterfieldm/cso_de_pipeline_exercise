@@ -2,6 +2,7 @@ import apache_beam as beam
 from apache_beam.options.pipeline_options import PipelineOptions, GoogleCloudOptions, StandardOptions, SetupOptions
 from apache_beam.io.gcp.pubsub import ReadFromPubSub
 from apache_beam.io.gcp.bigquery import WriteToBigQuery
+from apache_beam.io.gcp.gcsio import GcsIO
 import csv
 import json
 import re
@@ -39,15 +40,21 @@ class ParseAndValidateCSV(beam.DoFn):
 
     def get_schema(self, table_name):
         if table_name not in self.schemas_cache:
-            with open(f'{self.schemas_dir}/{table_name}_schema.json') as f:
-                # Convert JSON schema to dict with properties
+            schema_filename = f'{table_name}_schema.json'
+            gcs_path = f'gs://cso-exercise-ingestion-raw/schemas/{schema_filename}'
+
+            gcs = GcsIO()
+            with gcs.open(gcs_path, 'r') as f:
                 schema_json = json.load(f)
-                json_schema = {
-                    "type": "object",
-                    "properties": {field["name"]: {"type": self.map_type(field["type"])} for field in schema_json},
-                    "required": [field["name"] for field in schema_json if field["mode"] == "REQUIRED"]
-                }
-                self.schemas_cache[table_name] = json_schema
+
+            json_schema = {
+                "type": "object",
+                "properties": {field["name"]: {"type": self.map_type(field["type"])} for field in schema_json},
+                "required": [field["name"] for field in schema_json if field["mode"] == "REQUIRED"]
+            }
+
+            self.schemas_cache[table_name] = json_schema
+
         return self.schemas_cache[table_name]
 
     def map_type(self, bq_type):
