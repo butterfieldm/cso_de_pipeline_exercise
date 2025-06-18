@@ -36,7 +36,7 @@ jobs:
           python pipelines/cso_dataflow_pipeline.py \
             --runner DataflowRunner \
             --project cso-deng-pipeline \
-            --region europe-west2 \
+            --region us-central1 \
             --temp_location gs://cso-exercise-ingestion-raw/temp \
             --staging_location gs://cso-exercise-ingestion-raw/staging \
             --streaming
