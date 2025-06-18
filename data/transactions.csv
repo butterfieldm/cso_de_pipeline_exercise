@@ -1,5 +1,5 @@
 transaction_id,customer_id,transaction_dttm,amount,transaction_type,merchant_name,category,balance_after
-3
+TXN00001,CUST001,2024-01-22T14:03:33Z,-43.61,Debit Card,Netflix,Entertainment,956.39
 TXN00002,CUST001,2024-01-06T02:47:10Z,-43.11,Debit Card,EE Mobile,Telecommunication,913.28
 TXN00003,CUST001,2024-01-29T03:33:35Z,-88.07,Debit Card,Yorkshire Water,Utilities,825.21
 TXN00004,CUST001,2024-01-16T19:57:31Z,-60.55,Debit Card,Yorkshire Water,Utilities,764.66
