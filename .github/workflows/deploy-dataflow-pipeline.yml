@@ -37,6 +37,7 @@ jobs:
             --runner DataflowRunner \
             --project cso-deng-pipeline \
             --region us-central1 \
+            --zone=us-central1-f
             --temp_location gs://cso-exercise-ingestion-raw/temp \
             --staging_location gs://cso-exercise-ingestion-raw/staging \
             --streaming
