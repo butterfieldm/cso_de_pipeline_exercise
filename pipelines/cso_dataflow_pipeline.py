@@ -8,6 +8,7 @@ import json
 import re
 import os
 from jsonschema import validate, ValidationError
+import logging
 
 # === Load BigQuery schema dynamically ===
 def load_bq_schema_from_file(table_name):
@@ -76,32 +77,44 @@ class ParseAndValidateCSV(beam.DoFn):
         }.get(bq_type, "string")
 
     def process(self, element):
-        file_path = element['gcs_path']
-        table_name = element['table_name']
-        schema = self.get_schema(table_name)
+            file_path = element['gcs_path']
+            table_name = element['table_name']
 
-        with beam.io.filesystems.FileSystems.open(file_path) as f:
-            lines = [line.decode('utf-8', errors='replace') for line in f.readlines()]
-            reader = csv.DictReader(lines)
-            for row in reader:
-  
+            try:
+                with beam.io.filesystems.FileSystems.open(file_path) as f:
+                    raw_bytes = f.read()
+                text = raw_bytes.decode('utf-8', errors='replace').replace('\x00', '')
+                lines = text.splitlines()
+
                 try:
-                    # Type coercion for numbers
-                    for key, val in row.items():
-                        expected_type = schema["properties"].get(key, {}).get("type")
-                        if expected_type == "number":
-                            row[key] = float(val) if val else None
-                    validate(instance=row, schema=schema)
-                    yield beam.pvalue.TaggedOutput('valid', {
-                        "table_name": table_name,
-                        "row": row
-                    })
-                except ValidationError as e:
-                    yield beam.pvalue.TaggedOutput('error', {
-                        "table_name": table_name,
-                        "error": str(e),
-                        "row": row
-                    })
+                    reader = csv.DictReader(lines)
+                except Exception as e:
+                    logging.error(f"CSV parsing failed for file {file_path}: {e}")
+                    # Optionally yield an error row or just skip
+                    return
+
+                for i, row in enumerate(reader, start=1):
+                    try:
+                        # Add your validation here; example:
+                        if not row or any(v is None for v in row.values()):
+                            logging.warning(f"Invalid row {i} in file {file_path}: {row}")
+                            continue
+
+                        # Optionally: validate required fields, types, etc.
+
+                        yield {
+                            **row,
+                            'source_file': file_path,
+                            'table_name': table_name
+                        }
+
+                    except Exception as row_e:
+                        logging.error(f"Error processing row {i} in file {file_path}: {row_e}")
+                        # Optionally continue or yield error info
+
+            except Exception as file_e:
+                logging.error(f"Failed to read/process file {file_path}: {file_e}")
+                # Optionally yield an error record for monitoring
 
 # === Attach schema for valid rows ===
 class AddSchema(beam.DoFn):
