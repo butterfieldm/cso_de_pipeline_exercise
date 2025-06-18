@@ -24,7 +24,7 @@ class ExtractFileInfo(beam.DoFn):
         payload = json.loads(element.decode('utf-8'))
         gcs_path = payload['name']
         filename = os.path.basename(gcs_path)
-        match = re.match(r"(.*)\.csv", filename)
+        match = re.match(r"(.*)\.csv", filename, re.IGNORECASE)
         if match:
             yield {
                 "filename": filename,
@@ -74,10 +74,10 @@ class ParseAndValidateCSV(beam.DoFn):
         schema = self.get_schema(table_name)
 
         with beam.io.filesystems.FileSystems.open(file_path) as f:
-            for line in f:
-                line = line.decode('utf-8')
-                reader = csv.DictReader([line])
-                row = next(reader)
+            lines = [line.decode('utf-8') for line in f.readlines()]
+            reader = csv.DictReader(lines)
+            for row in reader:
+  
                 try:
                     # Type coercion for numbers
                     for key, val in row.items():
