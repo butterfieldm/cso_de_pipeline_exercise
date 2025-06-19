@@ -39,9 +39,9 @@ resource "google_bigquery_table" "staging_transactions" {
   deletion_protection = false
 }
 
-resource "google_bigquery_table" "staging_customer" {
+resource "google_bigquery_table" "staging_customers" {
   dataset_id         = google_bigquery_dataset.cso_exercise_bq_staging.dataset_id
-  table_id           = "customer"
+  table_id           = "customers"
   schema             = file("${path.module}/../schemas/customers_schema.json")
   deletion_protection = false
 }
@@ -54,9 +54,9 @@ resource "google_bigquery_table" "curated_transactions" {
   deletion_protection = false
 }
 
-resource "google_bigquery_table" "curated_customer" {
+resource "google_bigquery_table" "curated_customers" {
   dataset_id         = google_bigquery_dataset.cso_exercise_bq_curated.dataset_id
-  table_id           = "customer"
+  table_id           = "customers"
   schema             = file("${path.module}/../schemas/customers_schema.json")
   deletion_protection = false
 }
