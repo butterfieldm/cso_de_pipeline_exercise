@@ -125,3 +125,42 @@ resource "google_pubsub_topic_iam_member" "allow_gcs_publish_hardcoded_account" 
   role  = "roles/pubsub.publisher"
   member = "serviceAccount:service-452297162236@gs-project-accounts.iam.gserviceaccount.com"
 }
+
+resource "google_storage_bucket_object" "function_source" {
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "${path.module}/../functions/function-source.zip"
+}
+
+resource "google_cloudfunctions2_function" "gcs_trigger" {
+  name     = "trigger-dataflow-job"
+  location = var.region
+  project  = var.project_id
+
+  build_config {
+    runtime     = "python311"
+    entry_point = "trigger_dataflow"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.bucket.name
+        object = google_storage_bucket_object.function_source.name
+      }
+    }
+  }
+
+  service_config {
+    available_memory = "256M"
+    timeout_seconds  = 60
+    environment_variables = {
+      GCP_PROJECT       = var.project_id
+      REGION            = var.region
+      TEMPLATE_GCS_PATH = "gs://${var.bucket_name}/templates/cso-dataflow-template.json"
+    }
+  }
+
+  event_trigger {
+    event_type = "google.cloud.pubsub.topic.v1.messagePublished"
+    pubsub_topic = google_pubsub_topic.gcs_notifications.id
+    retry_policy = "RETRY_POLICY_DO_NOT_RETRY"
+  }
+}

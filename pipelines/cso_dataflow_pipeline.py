@@ -1,14 +1,14 @@
 import apache_beam as beam
-from apache_beam.options.pipeline_options import PipelineOptions, GoogleCloudOptions, StandardOptions, SetupOptions
-from apache_beam.io.gcp.pubsub import ReadFromPubSub
+from apache_beam.options.pipeline_options import PipelineOptions, StandardOptions, SetupOptions
 from apache_beam.io.gcp.bigquery import WriteToBigQuery
 from apache_beam.io.gcp.gcsio import GcsIO
+from apache_beam import pvalue
 import csv
 import json
 import re
 import os
-from jsonschema import validate, ValidationError
 import logging
+import argparse
 
 # === Load BigQuery schema dynamically ===
 def load_bq_schema_from_file(table_name):
@@ -86,35 +86,42 @@ class ParseAndValidateCSV(beam.DoFn):
                 text = raw_bytes.decode('utf-8', errors='replace').replace('\x00', '')
                 lines = text.splitlines()
 
-                try:
-                    reader = csv.DictReader(lines)
-                except Exception as e:
-                    logging.error(f"CSV parsing failed for file {file_path}: {e}")
-                    # Optionally yield an error row or just skip
-                    return
+                reader = csv.DictReader(lines)
 
                 for i, row in enumerate(reader, start=1):
                     try:
-                        # Add your validation here; example:
                         if not row or any(v is None for v in row.values()):
-                            logging.warning(f"Invalid row {i} in file {file_path}: {row}")
+                            error_info = {
+                                'table_name': table_name,
+                                'error': f'Invalid row {i}: {row}',
+                                'row': row,
+                            }
+                            yield pvalue.TaggedOutput('error', error_info)
                             continue
 
-                        # Optionally: validate required fields, types, etc.
-
-                        yield {
+                        valid_row = {
                             **row,
                             'source_file': file_path,
                             'table_name': table_name
                         }
+                        yield pvalue.TaggedOutput('valid', valid_row)
 
                     except Exception as row_e:
-                        logging.error(f"Error processing row {i} in file {file_path}: {row_e}")
-                        # Optionally continue or yield error info
+                        error_info = {
+                            'table_name': table_name,
+                            'error': f'Error processing row {i}: {row_e}',
+                            'row': row
+                        }
+                        yield pvalue.TaggedOutput('error', error_info)
 
-            except Exception as file_e:
-                logging.error(f"Failed to read/process file {file_path}: {file_e}")
-                # Optionally yield an error record for monitoring
+            except Exception as e:
+                error_info = {
+                    'table_name': table_name,
+                    'error': f'Failed to read/process file: {e}',
+                    'row': None
+                }
+                yield pvalue.TaggedOutput('error', error_info)
+
 
 # === Attach schema for valid rows ===
 class AddSchema(beam.DoFn):
@@ -129,32 +136,36 @@ class AddSchema(beam.DoFn):
         }
 
 # === Main pipeline run ===
-def run():
-    pipeline_options = PipelineOptions()
-    pipeline_options.view_as(StandardOptions).streaming = True
+def run(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input_file', required=True, help='GCS path to the input CSV')
+    parser.add_argument('--table_name', required=True, help='Target table name for BQ')
+    known_args, pipeline_args = parser.parse_known_args(argv)
+
+    pipeline_options = PipelineOptions(pipeline_args)
     pipeline_options.view_as(SetupOptions).save_main_session = True
+    pipeline_options.view_as(StandardOptions).streaming = False
 
     with beam.Pipeline(options=pipeline_options) as p:
-        messages = p | 'Read from Pub/Sub' >> ReadFromPubSub(
-            subscription='projects/cso-deng-pipeline/subscriptions/gcs-upload-sub')
+        metadata = p | 'Create file metadata' >> beam.Create([{
+            "filename": os.path.basename(known_args.input_file),
+            "table_name": known_args.table_name,
+            "gcs_path": known_args.input_file
+        }])
 
-        file_metadata = messages | 'Extract file info' >> beam.ParDo(ExtractFileInfo())
-
-        parsed = file_metadata | 'Parse and validate' >> beam.ParDo(ParseAndValidateCSV()).with_outputs('valid', 'error')
+        parsed = metadata | 'Parse and validate CSV' >> beam.ParDo(ParseAndValidateCSV()).with_outputs('valid', 'error')
 
         valid = parsed.valid
         errors = parsed.error
 
-        # === Write valid data to BigQuery staging tables ===
-        valid | 'Load schema for valid rows' >> beam.ParDo(AddSchema()) \
-              | 'Write valid rows to BigQuery' >> WriteToBigQuery(
+        valid | 'Load schema' >> beam.ParDo(AddSchema()) \
+              | 'Write to BigQuery' >> WriteToBigQuery(
                     table=lambda e: f"cso-deng-pipeline.cso_exercise_bq_staging.{e['table_name']}",
                     schema=lambda e: e['schema'],
                     write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
                     create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
                 )
 
-        # === Write invalid data to error hospital table ===
         errors | 'Write errors to BQ' >> beam.Map(lambda r: {
                     "table": r["table_name"],
                     "error": r["error"],
@@ -163,14 +174,15 @@ def run():
                     table="cso-deng-pipeline.cso_exercise_bq_error_hospital.error_log",
                     schema={
                         'fields': [
-                            {"name": "table", "type": "STRING", "mode": "REQUIRED"},
-                            {"name": "error", "type": "STRING", "mode": "REQUIRED"},
-                            {"name": "raw_row", "type": "STRING", "mode": "REQUIRED"}
+                            {"name": "table", "type": "STRING"},
+                            {"name": "error", "type": "STRING"},
+                            {"name": "raw_row", "type": "STRING"}
                         ]
                     },
                     write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
                     create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
                 )
+
 
 if __name__ == '__main__':
     run()
