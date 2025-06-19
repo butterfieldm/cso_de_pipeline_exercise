@@ -63,13 +63,13 @@ resource "google_bigquery_table" "curated_customers" {
 
 # Error Hospital
 resource "google_bigquery_table" "error_hospital_customers" {
-  dataset_id         = google_bigquery_dataset.cso_exercise_bq_curated.dataset_id
+  dataset_id         = google_bigquery_dataset.cso_exercise_bq_error_hospital.dataset_id
   table_id           = "customers"
   deletion_protection = false
 }
 
 resource "google_bigquery_table" "error_hospital_transactions" {
-  dataset_id         = google_bigquery_dataset.cso_exercise_bq_curated.dataset_id
+  dataset_id         = google_bigquery_dataset.cso_exercise_bq_error_hospital.dataset_id
   table_id           = "transactions"
   deletion_protection = false
 }
@@ -84,6 +84,11 @@ resource "google_storage_notification" "notify_uploads" {
   payload_format = "JSON_API_V1"
   topic          = google_pubsub_topic.gcs_notifications.id
   event_types    = ["OBJECT_FINALIZE"]
+
+  depends_on = [
+    google_pubsub_topic.gcs_notifications,
+    google_pubsub_topic_iam_member.allow_gcs_publish
+  ]
 }
 
 resource "google_pubsub_topic" "gcs_upload_topic" {
@@ -118,10 +123,10 @@ resource "google_pubsub_topic_iam_member" "gcs_publish_permission" {
   member   = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
 
-resource "google_pubsub_topic_iam_member" "allow_gcs_publish_hardcoded_account" {
-  topic = google_pubsub_topic.gcs_notifications.name
-  role  = "roles/pubsub.publisher"
-  member = "serviceAccount:service-452297162236@gs-project-accounts.iam.gserviceaccount.com"
+resource "google_pubsub_topic_iam_member" "allow_gcs_publish" {
+  topic  = google_pubsub_topic.gcs_notifications.name
+  role   = "roles/pubsub.publisher"
+  member = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
 
 resource "google_storage_bucket_object" "function_source" {
