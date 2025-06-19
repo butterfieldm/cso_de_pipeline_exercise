@@ -30,6 +30,11 @@ jobs:
         run: |
           cd functions
           zip -r ../gcp-terraform/function-source.zip .
+    
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
 
       - name: Terraform Init & Apply
         working-directory: ./gcp-terraform
