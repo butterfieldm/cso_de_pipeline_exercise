@@ -127,7 +127,7 @@ resource "google_pubsub_topic_iam_member" "allow_gcs_publish_hardcoded_account" 
 resource "google_storage_bucket_object" "function_source" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "${path.module}/../functions/function-source.zip"
+  source = "function-source.zip"
 }
 
 resource "google_cloudfunctions2_function" "gcs_trigger" {
