@@ -21,8 +21,13 @@ jobs:
       DATAFLOW_TEMPLATE_PATH: gs://cso-exercise-ingestion-raw/templates/cso-dataflow-template.json
 
     steps:
-      - name: Checkout
+      - name: Checkout full repo
         uses: actions/checkout@v4
+        with:
+         fetch-depth: 0
+  
+      - name: Debug files
+        run: ls -R
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
