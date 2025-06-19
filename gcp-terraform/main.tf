@@ -42,7 +42,7 @@ resource "google_bigquery_table" "staging_transactions" {
 resource "google_bigquery_table" "staging_customer" {
   dataset_id         = google_bigquery_dataset.cso_exercise_bq_staging.dataset_id
   table_id           = "customer"
-  schema             = file("${path.module}/../schemas/customer_schema.json")
+  schema             = file("${path.module}/../schemas/customers_schema.json")
   deletion_protection = false
 }
 
@@ -57,22 +57,7 @@ resource "google_bigquery_table" "curated_transactions" {
 resource "google_bigquery_table" "curated_customer" {
   dataset_id         = google_bigquery_dataset.cso_exercise_bq_curated.dataset_id
   table_id           = "customer"
-  schema             = file("${path.module}/../schemas/customer_schema.json")
-  deletion_protection = false
-}
-
-# Error Hospital
-resource "google_bigquery_table" "error_transactions" {
-  dataset_id         = google_bigquery_dataset.cso_exercise_bq_error_hospital.dataset_id
-  table_id           = "transactions_error_hospital"
-  schema             = file("${path.module}/../schemas/error_hospital_schema.json")
-  deletion_protection = false
-}
-
-resource "google_bigquery_table" "error_customer" {
-  dataset_id         = google_bigquery_dataset.cso_exercise_bq_error_hospital.dataset_id
-  table_id           = "customer_error_hospital"
-  schema             = file("${path.module}/../schemas/error_hospital_schema.json")
+  schema             = file("${path.module}/../schemas/customers_schema.json")
   deletion_protection = false
 }
 

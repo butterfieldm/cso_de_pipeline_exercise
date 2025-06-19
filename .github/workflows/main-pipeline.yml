@@ -40,10 +40,11 @@ jobs:
           terraform_version: 1.5.0
 
       - name: Terraform Init & Apply
+        working-directory: ./gcp-terraform
         run: |
-          terraform -chdir=gcp-terraform init
-          terraform -chdir=gcp-terraform apply -auto-approve
-
+          terraform init
+          terraform apply -auto-approve
+        
       - name: Build & Push Flex Template Image
         run: |
           IMAGE_URI=gcr.io/${{ env.PROJECT_ID }}/dataflow-flex-template:latest
