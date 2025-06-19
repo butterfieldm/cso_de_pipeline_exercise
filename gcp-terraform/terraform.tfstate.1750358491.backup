@@ -1,7 +1,7 @@
 {
   "version": 4,
   "terraform_version": "1.12.2",
-  "serial": 16,
+  "serial": 15,
   "lineage": "0f8e668e-fed4-a9a9-8367-aefda5c3401f",
   "outputs": {
     "bucket_url": {
@@ -372,6 +372,61 @@
           "dependencies": [
             "google_bigquery_dataset.cso_exercise_bq_curated"
           ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_bigquery_table",
+      "name": "staging_customer",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "biglake_configuration": [],
+            "clustering": null,
+            "creation_time": 1750173512770,
+            "dataset_id": "cso_exercise_bq_staging",
+            "deletion_protection": true,
+            "description": "",
+            "effective_labels": {
+              "goog-terraform-provisioned": "true"
+            },
+            "encryption_configuration": [],
+            "etag": "IRyyVKujRfGwYjJzwd3O8Q==",
+            "expiration_time": 0,
+            "external_catalog_table_options": [],
+            "external_data_configuration": [],
+            "friendly_name": "",
+            "id": "projects/cso-deng-pipeline/datasets/cso_exercise_bq_staging/tables/customer",
+            "labels": {},
+            "last_modified_time": 1750173512809,
+            "location": "US",
+            "materialized_view": [],
+            "max_staleness": "",
+            "num_bytes": 0,
+            "num_long_term_bytes": 0,
+            "num_rows": 0,
+            "project": "cso-deng-pipeline",
+            "range_partitioning": [],
+            "require_partition_filter": false,
+            "resource_tags": {},
+            "schema": "[{\"mode\":\"REQUIRED\",\"name\":\"customer_id\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"first_name\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"last_name\",\"type\":\"STRING\"},{\"mode\":\"NULLABLE\",\"name\":\"email\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"date_of_birth\",\"type\":\"DATE\"},{\"mode\":\"NULLABLE\",\"name\":\"phone\",\"type\":\"STRING\"},{\"mode\":\"NULLABLE\",\"name\":\"city\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"postcode\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"valid_from_dttm\",\"type\":\"TIMESTAMP\"},{\"mode\":\"REQUIRED\",\"name\":\"valid_to_dttm\",\"type\":\"TIMESTAMP\"}]",
+            "schema_foreign_type_info": [],
+            "self_link": "https://bigquery.googleapis.com/bigquery/v2/projects/cso-deng-pipeline/datasets/cso_exercise_bq_staging/tables/customer",
+            "table_constraints": [],
+            "table_id": "customer",
+            "table_metadata_view": null,
+            "table_replication_info": [],
+            "terraform_labels": {},
+            "time_partitioning": [],
+            "type": "TABLE",
+            "view": []
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjAifQ=="
         }
       ]
     },
