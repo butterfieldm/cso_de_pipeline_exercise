@@ -33,7 +33,12 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_PROJECT_KEY }}
-
+      
+      - name: Package Cloud Function
+        run: |
+         cd functions
+          zip -r ../function-source.zip .
+    
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -58,11 +63,6 @@ jobs:
             --image gcr.io/${{ env.PROJECT_ID }}/dataflow-flex-template:latest \
             --sdk-language "PYTHON" \
             --metadata-file metadata.json
-
-      - name: Package Cloud Function
-        run: |
-          cd functions
-          zip -r ../function-source.zip .
 
       - name: Upload Function Code
         run: |
