@@ -61,6 +61,19 @@ resource "google_bigquery_table" "curated_customers" {
   deletion_protection = false
 }
 
+# Error Hospital
+resource "google_bigquery_table" "error_hospital_customers" {
+  dataset_id         = google_bigquery_dataset.cso_exercise_bq_curated.dataset_id
+  table_id           = "customers"
+  deletion_protection = false
+}
+
+resource "google_bigquery_table" "error_hospital_transactions" {
+  dataset_id         = google_bigquery_dataset.cso_exercise_bq_curated.dataset_id
+  table_id           = "transactions"
+  deletion_protection = false
+}
+
 ## PubSub Notification
 resource "google_pubsub_topic" "gcs_notifications" {
   name = "gcs-new-file-topic"
