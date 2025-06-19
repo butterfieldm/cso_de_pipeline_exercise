@@ -39,10 +39,10 @@ resource "google_bigquery_table" "staging_transactions" {
   deletion_protection = false
 }
 
-resource "google_bigquery_table" "staging_customer" {
+resource "google_bigquery_table" "staging_customers" {
   dataset_id         = google_bigquery_dataset.cso_exercise_bq_staging.dataset_id
-  table_id           = "customer"
-  schema             = file("${path.module}/../schemas/customer_schema.json")
+  table_id           = "customers"
+  schema             = file("${path.module}/../schemas/customers_schema.json")
   deletion_protection = false
 }
 
@@ -54,25 +54,23 @@ resource "google_bigquery_table" "curated_transactions" {
   deletion_protection = false
 }
 
-resource "google_bigquery_table" "curated_customer" {
+resource "google_bigquery_table" "curated_customers" {
   dataset_id         = google_bigquery_dataset.cso_exercise_bq_curated.dataset_id
-  table_id           = "customer"
-  schema             = file("${path.module}/../schemas/customer_schema.json")
+  table_id           = "customers"
+  schema             = file("${path.module}/../schemas/customers_schema.json")
   deletion_protection = false
 }
 
 # Error Hospital
-resource "google_bigquery_table" "error_transactions" {
+resource "google_bigquery_table" "error_hospital_customers" {
   dataset_id         = google_bigquery_dataset.cso_exercise_bq_error_hospital.dataset_id
-  table_id           = "transactions_error_hospital"
-  schema             = file("${path.module}/../schemas/error_hospital_schema.json")
+  table_id           = "customers"
   deletion_protection = false
 }
 
-resource "google_bigquery_table" "error_customer" {
+resource "google_bigquery_table" "error_hospital_transactions" {
   dataset_id         = google_bigquery_dataset.cso_exercise_bq_error_hospital.dataset_id
-  table_id           = "customer_error_hospital"
-  schema             = file("${path.module}/../schemas/error_hospital_schema.json")
+  table_id           = "transactions"
   deletion_protection = false
 }
 
@@ -86,6 +84,11 @@ resource "google_storage_notification" "notify_uploads" {
   payload_format = "JSON_API_V1"
   topic          = google_pubsub_topic.gcs_notifications.id
   event_types    = ["OBJECT_FINALIZE"]
+
+  depends_on = [
+    google_pubsub_topic.gcs_notifications,
+    google_pubsub_topic_iam_member.allow_gcs_publish
+  ]
 }
 
 resource "google_pubsub_topic" "gcs_upload_topic" {
@@ -120,16 +123,14 @@ resource "google_pubsub_topic_iam_member" "gcs_publish_permission" {
   member   = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
 
-resource "google_pubsub_topic_iam_member" "allow_gcs_publish_hardcoded_account" {
-  topic = google_pubsub_topic.gcs_notifications.name
-  role  = "roles/pubsub.publisher"
-  member = "serviceAccount:service-452297162236@gs-project-accounts.iam.gserviceaccount.com"
-}
-
 resource "google_storage_bucket_object" "function_source" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "${path.module}/../functions/function-source.zip"
+  source = "function-source.zip"
+}
+
+output "current_region" {
+  value = var.region
 }
 
 resource "google_cloudfunctions2_function" "gcs_trigger" {
@@ -139,7 +140,7 @@ resource "google_cloudfunctions2_function" "gcs_trigger" {
 
   build_config {
     runtime     = "python311"
-    entry_point = "trigger_dataflow"
+    entry_point = "trigger_dataflow"  # your function name inside main.py
     source {
       storage_source {
         bucket = google_storage_bucket.bucket.name
@@ -159,8 +160,9 @@ resource "google_cloudfunctions2_function" "gcs_trigger" {
   }
 
   event_trigger {
-    event_type = "google.cloud.pubsub.topic.v1.messagePublished"
+    event_type   = "google.cloud.pubsub.topic.v1.messagePublished"
     pubsub_topic = google_pubsub_topic.gcs_notifications.id
     retry_policy = "RETRY_POLICY_DO_NOT_RETRY"
   }
 }
+

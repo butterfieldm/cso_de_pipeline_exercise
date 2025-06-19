@@ -1,7 +1,7 @@
 import functions_framework
 import os
 import time
-from googleapiclient.discovery import build
+import build
 from google.oauth2 import service_account
 
 @functions_framework.cloud_event

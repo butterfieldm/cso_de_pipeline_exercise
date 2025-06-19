@@ -1,15 +1,11 @@
 {
   "version": 4,
   "terraform_version": "1.12.2",
-  "serial": 116,
+  "serial": 14,
   "lineage": "0f8e668e-fed4-a9a9-8367-aefda5c3401f",
   "outputs": {
     "bucket_url": {
       "value": "gs://cso-exercise-ingestion-raw/",
-      "type": "string"
-    },
-    "current_region": {
-      "value": "us-central1",
       "type": "string"
     }
   },
@@ -61,7 +57,7 @@
                 "role": "OWNER",
                 "routine": [],
                 "special_group": "",
-                "user_by_email": "michaelrb24680@gmail.com",
+                "user_by_email": "user-demo-service-account@cso-deng-pipeline.iam.gserviceaccount.com",
                 "view": []
               },
               {
@@ -101,39 +97,37 @@
                 "view": []
               }
             ],
-            "creation_time": 1750364526521,
+            "creation_time": 1750173511774,
             "dataset_id": "cso_exercise_bq_curated",
             "default_collation": "",
             "default_encryption_configuration": [],
             "default_partition_expiration_ms": 0,
             "default_table_expiration_ms": 0,
-            "delete_contents_on_destroy": true,
+            "delete_contents_on_destroy": false,
             "description": "",
             "effective_labels": {
               "goog-terraform-provisioned": "true"
             },
-            "etag": "ELhQG74lu71xRfurzeMrUQ==",
+            "etag": "bzFbhUnB9uGVmVOiNHjzZQ==",
             "external_catalog_dataset_options": [],
             "external_dataset_reference": [],
             "friendly_name": "",
             "id": "projects/cso-deng-pipeline/datasets/cso_exercise_bq_curated",
             "is_case_insensitive": false,
             "labels": {},
-            "last_modified_time": 1750364526521,
-            "location": "us-central1",
+            "last_modified_time": 1750358220912,
+            "location": "US",
             "max_time_travel_hours": "168",
             "project": "cso-deng-pipeline",
             "resource_tags": {},
             "self_link": "https://bigquery.googleapis.com/bigquery/v2/projects/cso-deng-pipeline/datasets/cso_exercise_bq_curated",
             "storage_billing_model": "",
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
+            "terraform_labels": {},
             "timeouts": null
           },
           "sensitive_attributes": [],
           "identity_schema_version": 0,
-          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19"
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMCJ9"
         }
       ]
     },
@@ -156,7 +150,7 @@
                 "role": "OWNER",
                 "routine": [],
                 "special_group": "",
-                "user_by_email": "michaelrb24680@gmail.com",
+                "user_by_email": "user-demo-service-account@cso-deng-pipeline.iam.gserviceaccount.com",
                 "view": []
               },
               {
@@ -196,39 +190,37 @@
                 "view": []
               }
             ],
-            "creation_time": 1750364526524,
+            "creation_time": 1750173511768,
             "dataset_id": "cso_exercise_bq_error_hospital",
             "default_collation": "",
             "default_encryption_configuration": [],
             "default_partition_expiration_ms": 0,
             "default_table_expiration_ms": 0,
-            "delete_contents_on_destroy": true,
+            "delete_contents_on_destroy": false,
             "description": "",
             "effective_labels": {
               "goog-terraform-provisioned": "true"
             },
-            "etag": "wFpMNPHg/9pYO3BqdvMheg==",
+            "etag": "chlaUIoUjn6i0o3+YNd3qg==",
             "external_catalog_dataset_options": [],
             "external_dataset_reference": [],
             "friendly_name": "",
             "id": "projects/cso-deng-pipeline/datasets/cso_exercise_bq_error_hospital",
             "is_case_insensitive": false,
             "labels": {},
-            "last_modified_time": 1750364526524,
-            "location": "us-central1",
+            "last_modified_time": 1750358220916,
+            "location": "US",
             "max_time_travel_hours": "168",
             "project": "cso-deng-pipeline",
             "resource_tags": {},
             "self_link": "https://bigquery.googleapis.com/bigquery/v2/projects/cso-deng-pipeline/datasets/cso_exercise_bq_error_hospital",
             "storage_billing_model": "",
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
+            "terraform_labels": {},
             "timeouts": null
           },
           "sensitive_attributes": [],
           "identity_schema_version": 0,
-          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19"
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMCJ9"
         }
       ]
     },
@@ -251,7 +243,7 @@
                 "role": "OWNER",
                 "routine": [],
                 "special_group": "",
-                "user_by_email": "michaelrb24680@gmail.com",
+                "user_by_email": "user-demo-service-account@cso-deng-pipeline.iam.gserviceaccount.com",
                 "view": []
               },
               {
@@ -291,46 +283,44 @@
                 "view": []
               }
             ],
-            "creation_time": 1750364526530,
+            "creation_time": 1750173511765,
             "dataset_id": "cso_exercise_bq_staging",
             "default_collation": "",
             "default_encryption_configuration": [],
             "default_partition_expiration_ms": 0,
             "default_table_expiration_ms": 0,
-            "delete_contents_on_destroy": true,
+            "delete_contents_on_destroy": false,
             "description": "",
             "effective_labels": {
               "goog-terraform-provisioned": "true"
             },
-            "etag": "4dx2DNmtr991Xr1bu1GcbA==",
+            "etag": "YzUDDEFhyTJhqs7wtByRqw==",
             "external_catalog_dataset_options": [],
             "external_dataset_reference": [],
             "friendly_name": "",
             "id": "projects/cso-deng-pipeline/datasets/cso_exercise_bq_staging",
             "is_case_insensitive": false,
             "labels": {},
-            "last_modified_time": 1750364526530,
-            "location": "us-central1",
+            "last_modified_time": 1750358220914,
+            "location": "US",
             "max_time_travel_hours": "168",
             "project": "cso-deng-pipeline",
             "resource_tags": {},
             "self_link": "https://bigquery.googleapis.com/bigquery/v2/projects/cso-deng-pipeline/datasets/cso_exercise_bq_staging",
             "storage_billing_model": "",
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
+            "terraform_labels": {},
             "timeouts": null
           },
           "sensitive_attributes": [],
           "identity_schema_version": 0,
-          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19"
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMCJ9"
         }
       ]
     },
     {
       "mode": "managed",
       "type": "google_bigquery_table",
-      "name": "curated_customers",
+      "name": "curated_customer",
       "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
       "instances": [
         {
@@ -338,23 +328,23 @@
           "attributes": {
             "biglake_configuration": [],
             "clustering": null,
-            "creation_time": 1750364847229,
+            "creation_time": 1750358014727,
             "dataset_id": "cso_exercise_bq_curated",
-            "deletion_protection": false,
+            "deletion_protection": true,
             "description": "",
             "effective_labels": {
               "goog-terraform-provisioned": "true"
             },
             "encryption_configuration": [],
-            "etag": "nNfOYPCKABAIr1+8FtYfMg==",
+            "etag": "pxGMUG+mqVsIjzBW4MMuCA==",
             "expiration_time": 0,
             "external_catalog_table_options": [],
             "external_data_configuration": [],
             "friendly_name": "",
-            "id": "projects/cso-deng-pipeline/datasets/cso_exercise_bq_curated/tables/customers",
+            "id": "projects/cso-deng-pipeline/datasets/cso_exercise_bq_curated/tables/customer",
             "labels": {},
-            "last_modified_time": 1750364847291,
-            "location": "us-central1",
+            "last_modified_time": 1750358014773,
+            "location": "US",
             "materialized_view": [],
             "max_staleness": "",
             "num_bytes": 0,
@@ -366,24 +356,19 @@
             "resource_tags": {},
             "schema": "[{\"mode\":\"REQUIRED\",\"name\":\"customer_id\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"first_name\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"last_name\",\"type\":\"STRING\"},{\"mode\":\"NULLABLE\",\"name\":\"email\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"date_of_birth\",\"type\":\"DATE\"},{\"mode\":\"NULLABLE\",\"name\":\"phone\",\"type\":\"STRING\"},{\"mode\":\"NULLABLE\",\"name\":\"city\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"postcode\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"valid_from_dttm\",\"type\":\"TIMESTAMP\"},{\"mode\":\"REQUIRED\",\"name\":\"valid_to_dttm\",\"type\":\"TIMESTAMP\"}]",
             "schema_foreign_type_info": [],
-            "self_link": "https://bigquery.googleapis.com/bigquery/v2/projects/cso-deng-pipeline/datasets/cso_exercise_bq_curated/tables/customers",
+            "self_link": "https://bigquery.googleapis.com/bigquery/v2/projects/cso-deng-pipeline/datasets/cso_exercise_bq_curated/tables/customer",
             "table_constraints": [],
-            "table_id": "customers",
+            "table_id": "customer",
             "table_metadata_view": null,
             "table_replication_info": [],
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
+            "terraform_labels": {},
             "time_partitioning": [],
             "type": "TABLE",
             "view": []
           },
           "sensitive_attributes": [],
           "identity_schema_version": 0,
-          "private": "bnVsbA==",
-          "dependencies": [
-            "google_bigquery_dataset.cso_exercise_bq_curated"
-          ]
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjAifQ=="
         }
       ]
     },
@@ -398,23 +383,23 @@
           "attributes": {
             "biglake_configuration": [],
             "clustering": null,
-            "creation_time": 1750364847177,
+            "creation_time": 1750173512770,
             "dataset_id": "cso_exercise_bq_curated",
-            "deletion_protection": false,
+            "deletion_protection": true,
             "description": "",
             "effective_labels": {
               "goog-terraform-provisioned": "true"
             },
             "encryption_configuration": [],
-            "etag": "N+WZQFSUWI8ayjqM70KTcA==",
+            "etag": "zAbvN0MHfajTTRi/pPgKfg==",
             "expiration_time": 0,
             "external_catalog_table_options": [],
             "external_data_configuration": [],
             "friendly_name": "",
             "id": "projects/cso-deng-pipeline/datasets/cso_exercise_bq_curated/tables/transactions",
             "labels": {},
-            "last_modified_time": 1750364847214,
-            "location": "us-central1",
+            "last_modified_time": 1750173512808,
+            "location": "US",
             "materialized_view": [],
             "max_staleness": "",
             "num_bytes": 0,
@@ -431,16 +416,14 @@
             "table_id": "transactions",
             "table_metadata_view": null,
             "table_replication_info": [],
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
+            "terraform_labels": {},
             "time_partitioning": [],
             "type": "TABLE",
             "view": []
           },
           "sensitive_attributes": [],
           "identity_schema_version": 0,
-          "private": "bnVsbA==",
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjAifQ==",
           "dependencies": [
             "google_bigquery_dataset.cso_exercise_bq_curated"
           ]
@@ -450,7 +433,7 @@
     {
       "mode": "managed",
       "type": "google_bigquery_table",
-      "name": "error_hospital_customers",
+      "name": "staging_customer",
       "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
       "instances": [
         {
@@ -458,143 +441,23 @@
           "attributes": {
             "biglake_configuration": [],
             "clustering": null,
-            "creation_time": 1750364847173,
-            "dataset_id": "cso_exercise_bq_error_hospital",
-            "deletion_protection": false,
-            "description": "",
-            "effective_labels": {
-              "goog-terraform-provisioned": "true"
-            },
-            "encryption_configuration": [],
-            "etag": "tqEX0KoLZcArYcv8ktcG7Q==",
-            "expiration_time": 0,
-            "external_catalog_table_options": [],
-            "external_data_configuration": [],
-            "friendly_name": "",
-            "id": "projects/cso-deng-pipeline/datasets/cso_exercise_bq_error_hospital/tables/customers",
-            "labels": {},
-            "last_modified_time": 1750364847220,
-            "location": "us-central1",
-            "materialized_view": [],
-            "max_staleness": "",
-            "num_bytes": 0,
-            "num_long_term_bytes": 0,
-            "num_rows": 0,
-            "project": "cso-deng-pipeline",
-            "range_partitioning": [],
-            "require_partition_filter": false,
-            "resource_tags": {},
-            "schema": null,
-            "schema_foreign_type_info": [],
-            "self_link": "https://bigquery.googleapis.com/bigquery/v2/projects/cso-deng-pipeline/datasets/cso_exercise_bq_error_hospital/tables/customers",
-            "table_constraints": [],
-            "table_id": "customers",
-            "table_metadata_view": null,
-            "table_replication_info": [],
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
-            "time_partitioning": [],
-            "type": "TABLE",
-            "view": []
-          },
-          "sensitive_attributes": [],
-          "identity_schema_version": 0,
-          "private": "bnVsbA==",
-          "dependencies": [
-            "google_bigquery_dataset.cso_exercise_bq_error_hospital"
-          ]
-        }
-      ]
-    },
-    {
-      "mode": "managed",
-      "type": "google_bigquery_table",
-      "name": "error_hospital_transactions",
-      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
-      "instances": [
-        {
-          "schema_version": 0,
-          "attributes": {
-            "biglake_configuration": [],
-            "clustering": null,
-            "creation_time": 1750364847179,
-            "dataset_id": "cso_exercise_bq_error_hospital",
-            "deletion_protection": false,
-            "description": "",
-            "effective_labels": {
-              "goog-terraform-provisioned": "true"
-            },
-            "encryption_configuration": [],
-            "etag": "gWN3RUGBKA18HPEFBPbkpQ==",
-            "expiration_time": 0,
-            "external_catalog_table_options": [],
-            "external_data_configuration": [],
-            "friendly_name": "",
-            "id": "projects/cso-deng-pipeline/datasets/cso_exercise_bq_error_hospital/tables/transactions",
-            "labels": {},
-            "last_modified_time": 1750364847216,
-            "location": "us-central1",
-            "materialized_view": [],
-            "max_staleness": "",
-            "num_bytes": 0,
-            "num_long_term_bytes": 0,
-            "num_rows": 0,
-            "project": "cso-deng-pipeline",
-            "range_partitioning": [],
-            "require_partition_filter": false,
-            "resource_tags": {},
-            "schema": null,
-            "schema_foreign_type_info": [],
-            "self_link": "https://bigquery.googleapis.com/bigquery/v2/projects/cso-deng-pipeline/datasets/cso_exercise_bq_error_hospital/tables/transactions",
-            "table_constraints": [],
-            "table_id": "transactions",
-            "table_metadata_view": null,
-            "table_replication_info": [],
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
-            "time_partitioning": [],
-            "type": "TABLE",
-            "view": []
-          },
-          "sensitive_attributes": [],
-          "identity_schema_version": 0,
-          "private": "bnVsbA==",
-          "dependencies": [
-            "google_bigquery_dataset.cso_exercise_bq_error_hospital"
-          ]
-        }
-      ]
-    },
-    {
-      "mode": "managed",
-      "type": "google_bigquery_table",
-      "name": "staging_customers",
-      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
-      "instances": [
-        {
-          "schema_version": 0,
-          "attributes": {
-            "biglake_configuration": [],
-            "clustering": null,
-            "creation_time": 1750364847179,
+            "creation_time": 1750173512770,
             "dataset_id": "cso_exercise_bq_staging",
-            "deletion_protection": false,
+            "deletion_protection": true,
             "description": "",
             "effective_labels": {
               "goog-terraform-provisioned": "true"
             },
             "encryption_configuration": [],
-            "etag": "gcE/9/aZ4HjwDdkL2k/wpA==",
+            "etag": "IRyyVKujRfGwYjJzwd3O8Q==",
             "expiration_time": 0,
             "external_catalog_table_options": [],
             "external_data_configuration": [],
             "friendly_name": "",
-            "id": "projects/cso-deng-pipeline/datasets/cso_exercise_bq_staging/tables/customers",
+            "id": "projects/cso-deng-pipeline/datasets/cso_exercise_bq_staging/tables/customer",
             "labels": {},
-            "last_modified_time": 1750364847222,
-            "location": "us-central1",
+            "last_modified_time": 1750173512809,
+            "location": "US",
             "materialized_view": [],
             "max_staleness": "",
             "num_bytes": 0,
@@ -606,24 +469,19 @@
             "resource_tags": {},
             "schema": "[{\"mode\":\"REQUIRED\",\"name\":\"customer_id\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"first_name\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"last_name\",\"type\":\"STRING\"},{\"mode\":\"NULLABLE\",\"name\":\"email\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"date_of_birth\",\"type\":\"DATE\"},{\"mode\":\"NULLABLE\",\"name\":\"phone\",\"type\":\"STRING\"},{\"mode\":\"NULLABLE\",\"name\":\"city\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"postcode\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"valid_from_dttm\",\"type\":\"TIMESTAMP\"},{\"mode\":\"REQUIRED\",\"name\":\"valid_to_dttm\",\"type\":\"TIMESTAMP\"}]",
             "schema_foreign_type_info": [],
-            "self_link": "https://bigquery.googleapis.com/bigquery/v2/projects/cso-deng-pipeline/datasets/cso_exercise_bq_staging/tables/customers",
+            "self_link": "https://bigquery.googleapis.com/bigquery/v2/projects/cso-deng-pipeline/datasets/cso_exercise_bq_staging/tables/customer",
             "table_constraints": [],
-            "table_id": "customers",
+            "table_id": "customer",
             "table_metadata_view": null,
             "table_replication_info": [],
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
+            "terraform_labels": {},
             "time_partitioning": [],
             "type": "TABLE",
             "view": []
           },
           "sensitive_attributes": [],
           "identity_schema_version": 0,
-          "private": "bnVsbA==",
-          "dependencies": [
-            "google_bigquery_dataset.cso_exercise_bq_staging"
-          ]
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjAifQ=="
         }
       ]
     },
@@ -638,23 +496,23 @@
           "attributes": {
             "biglake_configuration": [],
             "clustering": null,
-            "creation_time": 1750364847188,
+            "creation_time": 1750173512770,
             "dataset_id": "cso_exercise_bq_staging",
-            "deletion_protection": false,
+            "deletion_protection": true,
             "description": "",
             "effective_labels": {
               "goog-terraform-provisioned": "true"
             },
             "encryption_configuration": [],
-            "etag": "ONRNyXzB7ANyIfeLAeB07A==",
+            "etag": "eXYwnKpbuX4o5WUE/m4ZhQ==",
             "expiration_time": 0,
             "external_catalog_table_options": [],
             "external_data_configuration": [],
             "friendly_name": "",
             "id": "projects/cso-deng-pipeline/datasets/cso_exercise_bq_staging/tables/transactions",
             "labels": {},
-            "last_modified_time": 1750364847242,
-            "location": "us-central1",
+            "last_modified_time": 1750173512816,
+            "location": "US",
             "materialized_view": [],
             "max_staleness": "",
             "num_bytes": 0,
@@ -671,145 +529,17 @@
             "table_id": "transactions",
             "table_metadata_view": null,
             "table_replication_info": [],
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
+            "terraform_labels": {},
             "time_partitioning": [],
             "type": "TABLE",
             "view": []
           },
           "sensitive_attributes": [],
           "identity_schema_version": 0,
-          "private": "bnVsbA==",
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjAifQ==",
           "dependencies": [
             "google_bigquery_dataset.cso_exercise_bq_staging"
           ]
-        }
-      ]
-    },
-    {
-      "mode": "managed",
-      "type": "google_cloudfunctions2_function",
-      "name": "gcs_trigger",
-      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
-      "instances": [
-        {
-          "schema_version": 0,
-          "attributes": {
-            "build_config": [
-              {
-                "automatic_update_policy": [
-                  {}
-                ],
-                "build": "projects/452297162236/locations/us-central1/builds/9ad3c1a3-90b6-4fb5-9ee1-926f51e48d1d",
-                "docker_repository": "projects/cso-deng-pipeline/locations/us-central1/repositories/gcf-artifacts",
-                "entry_point": "trigger_dataflow",
-                "environment_variables": {},
-                "on_deploy_update_policy": [],
-                "runtime": "python311",
-                "service_account": "projects/cso-deng-pipeline/serviceAccounts/452297162236-compute@developer.gserviceaccount.com",
-                "source": [
-                  {
-                    "repo_source": [],
-                    "storage_source": [
-                      {
-                        "bucket": "cso-exercise-ingestion-raw",
-                        "generation": 1750366948248400,
-                        "object": "function-source.zip"
-                      }
-                    ]
-                  }
-                ],
-                "worker_pool": ""
-              }
-            ],
-            "description": "",
-            "effective_labels": {
-              "goog-terraform-provisioned": "true"
-            },
-            "environment": "GEN_2",
-            "event_trigger": [
-              {
-                "event_filters": [],
-                "event_type": "google.cloud.pubsub.topic.v1.messagePublished",
-                "pubsub_topic": "projects/cso-deng-pipeline/topics/gcs-new-file-topic",
-                "retry_policy": "RETRY_POLICY_DO_NOT_RETRY",
-                "service_account_email": "452297162236-compute@developer.gserviceaccount.com",
-                "trigger": "projects/cso-deng-pipeline/locations/us-central1/triggers/trigger-dataflow-job-602022",
-                "trigger_region": "us-central1"
-              }
-            ],
-            "id": "projects/cso-deng-pipeline/locations/us-central1/functions/trigger-dataflow-job",
-            "kms_key_name": "",
-            "labels": null,
-            "location": "us-central1",
-            "name": "trigger-dataflow-job",
-            "project": "cso-deng-pipeline",
-            "service_config": [
-              {
-                "all_traffic_on_latest_revision": true,
-                "available_cpu": "0.1666",
-                "available_memory": "256M",
-                "binary_authorization_policy": "",
-                "environment_variables": {
-                  "GCP_PROJECT": "cso-deng-pipeline",
-                  "LOG_EXECUTION_ID": "true",
-                  "REGION": "us-central1",
-                  "TEMPLATE_GCS_PATH": "gs://cso-exercise-ingestion-raw/templates/cso-dataflow-template.json"
-                },
-                "gcf_uri": "",
-                "ingress_settings": "ALLOW_ALL",
-                "max_instance_count": 100,
-                "max_instance_request_concurrency": 1,
-                "min_instance_count": 0,
-                "secret_environment_variables": [],
-                "secret_volumes": [],
-                "service": "projects/cso-deng-pipeline/locations/us-central1/services/trigger-dataflow-job",
-                "service_account_email": "452297162236-compute@developer.gserviceaccount.com",
-                "timeout_seconds": 60,
-                "uri": "https://trigger-dataflow-job-ozqfwxbklq-uc.a.run.app",
-                "vpc_connector": "",
-                "vpc_connector_egress_settings": ""
-              }
-            ],
-            "state": "ACTIVE",
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
-            "timeouts": null,
-            "update_time": "2025-06-19T21:05:45.057178725Z",
-            "url": "https://us-central1-cso-deng-pipeline.cloudfunctions.net/trigger-dataflow-job"
-          },
-          "sensitive_attributes": [],
-          "identity_schema_version": 0,
-          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozNjAwMDAwMDAwMDAwLCJkZWxldGUiOjM2MDAwMDAwMDAwMDAsInVwZGF0ZSI6MzYwMDAwMDAwMDAwMH19",
-          "dependencies": [
-            "google_pubsub_topic.gcs_notifications",
-            "google_storage_bucket.bucket",
-            "google_storage_bucket_object.function_source"
-          ]
-        }
-      ]
-    },
-    {
-      "mode": "managed",
-      "type": "google_project_service",
-      "name": "pubsub",
-      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
-      "instances": [
-        {
-          "schema_version": 0,
-          "attributes": {
-            "disable_dependent_services": null,
-            "disable_on_destroy": true,
-            "id": "cso-deng-pipeline/pubsub.googleapis.com",
-            "project": "cso-deng-pipeline",
-            "service": "pubsub.googleapis.com",
-            "timeouts": null
-          },
-          "sensitive_attributes": [],
-          "identity_schema_version": 0,
-          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInJlYWQiOjYwMDAwMDAwMDAwMCwidXBkYXRlIjoxMjAwMDAwMDAwMDAwfX0="
         }
       ]
     },
@@ -846,15 +576,13 @@
             "push_config": [],
             "retain_acked_messages": false,
             "retry_policy": [],
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
+            "terraform_labels": {},
             "timeouts": null,
             "topic": "projects/cso-deng-pipeline/topics/gcs-file-drop-topic"
           },
           "sensitive_attributes": [],
           "identity_schema_version": 0,
-          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19",
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMCJ9",
           "dependencies": [
             "google_pubsub_topic.gcs_upload_topic"
           ]
@@ -883,14 +611,12 @@
             "name": "gcs-new-file-topic",
             "project": "cso-deng-pipeline",
             "schema_settings": [],
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
+            "terraform_labels": {},
             "timeouts": null
           },
           "sensitive_attributes": [],
           "identity_schema_version": 0,
-          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19"
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMCJ9"
         }
       ]
     },
@@ -903,9 +629,7 @@
         {
           "schema_version": 0,
           "attributes": {
-            "effective_labels": {
-              "goog-terraform-provisioned": "true"
-            },
+            "effective_labels": {},
             "id": "projects/cso-deng-pipeline/topics/gcs-file-drop-topic",
             "ingestion_data_source_settings": [],
             "kms_key_name": "",
@@ -916,68 +640,12 @@
             "name": "gcs-file-drop-topic",
             "project": "cso-deng-pipeline",
             "schema_settings": [],
-            "terraform_labels": {
-              "goog-terraform-provisioned": "true"
-            },
+            "terraform_labels": {},
             "timeouts": null
           },
           "sensitive_attributes": [],
           "identity_schema_version": 0,
-          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19"
-        }
-      ]
-    },
-    {
-      "mode": "managed",
-      "type": "google_pubsub_topic_iam_member",
-      "name": "allow_gcs_publish",
-      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
-      "instances": [
-        {
-          "schema_version": 0,
-          "attributes": {
-            "condition": [],
-            "etag": "BwY38ZicPLE=",
-            "id": "projects/cso-deng-pipeline/topics/gcs-new-file-topic/roles/pubsub.publisher/serviceAccount:service-452297162236@gs-project-accounts.iam.gserviceaccount.com",
-            "member": "serviceAccount:service-452297162236@gs-project-accounts.iam.gserviceaccount.com",
-            "project": "cso-deng-pipeline",
-            "role": "roles/pubsub.publisher",
-            "topic": "projects/cso-deng-pipeline/topics/gcs-new-file-topic"
-          },
-          "sensitive_attributes": [],
-          "identity_schema_version": 0,
-          "private": "bnVsbA==",
-          "dependencies": [
-            "data.google_project.project",
-            "google_pubsub_topic.gcs_notifications"
-          ]
-        }
-      ]
-    },
-    {
-      "mode": "managed",
-      "type": "google_pubsub_topic_iam_member",
-      "name": "gcs_publish_permission",
-      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
-      "instances": [
-        {
-          "schema_version": 0,
-          "attributes": {
-            "condition": [],
-            "etag": "BwY38ZicPLE=",
-            "id": "projects/cso-deng-pipeline/topics/gcs-new-file-topic/roles/pubsub.publisher/serviceAccount:service-452297162236@gs-project-accounts.iam.gserviceaccount.com",
-            "member": "serviceAccount:service-452297162236@gs-project-accounts.iam.gserviceaccount.com",
-            "project": "cso-deng-pipeline",
-            "role": "roles/pubsub.publisher",
-            "topic": "projects/cso-deng-pipeline/topics/gcs-new-file-topic"
-          },
-          "sensitive_attributes": [],
-          "identity_schema_version": 0,
-          "private": "bnVsbA==",
-          "dependencies": [
-            "data.google_project.project",
-            "google_pubsub_topic.gcs_notifications"
-          ]
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMCJ9"
         }
       ]
     },
@@ -1009,7 +677,7 @@
             "ip_filter": [],
             "labels": {},
             "lifecycle_rule": [],
-            "location": "US-CENTRAL1",
+            "location": "US",
             "logging": [],
             "name": "cso-exercise-ingestion-raw",
             "project": "cso-deng-pipeline",
@@ -1017,11 +685,11 @@
             "public_access_prevention": "inherited",
             "requester_pays": false,
             "retention_policy": [],
-            "rpo": null,
+            "rpo": "DEFAULT",
             "self_link": "https://www.googleapis.com/storage/v1/b/cso-exercise-ingestion-raw",
             "soft_delete_policy": [
               {
-                "effective_time": "2025-06-19T20:22:08.059Z",
+                "effective_time": "2025-06-13T14:45:03.825Z",
                 "retention_duration_seconds": 604800
               }
             ],
@@ -1029,10 +697,10 @@
             "terraform_labels": {
               "goog-terraform-provisioned": "true"
             },
-            "time_created": "2025-06-19T20:22:08.059Z",
+            "time_created": "2025-06-13T14:45:03.825Z",
             "timeouts": null,
             "uniform_bucket_level_access": false,
-            "updated": "2025-06-19T20:27:27.777Z",
+            "updated": "2025-06-19T18:37:01.472Z",
             "url": "gs://cso-exercise-ingestion-raw",
             "versioning": [],
             "website": []
@@ -1040,91 +708,6 @@
           "sensitive_attributes": [],
           "identity_schema_version": 0,
           "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsInJlYWQiOjI0MDAwMDAwMDAwMCwidXBkYXRlIjoyNDAwMDAwMDAwMDB9LCJzY2hlbWFfdmVyc2lvbiI6IjMifQ=="
-        }
-      ]
-    },
-    {
-      "mode": "managed",
-      "type": "google_storage_bucket_object",
-      "name": "function_source",
-      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
-      "instances": [
-        {
-          "schema_version": 0,
-          "attributes": {
-            "bucket": "cso-exercise-ingestion-raw",
-            "cache_control": "",
-            "content": null,
-            "content_disposition": "",
-            "content_encoding": "",
-            "content_language": "",
-            "content_type": "application/zip",
-            "crc32c": "kUbtKQ==",
-            "customer_encryption": [],
-            "detect_md5hash": "Tmc9ytQaUbWlknhJhiPIgQ==",
-            "event_based_hold": false,
-            "generation": 1750366946794991,
-            "id": "cso-exercise-ingestion-raw-function-source.zip",
-            "kms_key_name": "",
-            "md5hash": "Tmc9ytQaUbWlknhJhiPIgQ==",
-            "md5hexhash": "4e673dcad41a51b5a59278498623c881",
-            "media_link": "https://storage.googleapis.com/download/storage/v1/b/cso-exercise-ingestion-raw/o/function-source.zip?generation=1750366946794991\u0026alt=media",
-            "metadata": {},
-            "name": "function-source.zip",
-            "output_name": "function-source.zip",
-            "retention": [],
-            "self_link": "https://www.googleapis.com/storage/v1/b/cso-exercise-ingestion-raw/o/function-source.zip",
-            "source": "function-source.zip",
-            "storage_class": "STANDARD",
-            "temporary_hold": false,
-            "timeouts": null
-          },
-          "sensitive_attributes": [
-            [
-              {
-                "type": "get_attr",
-                "value": "content"
-              }
-            ]
-          ],
-          "identity_schema_version": 0,
-          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoyNDAwMDAwMDAwMDAsImRlbGV0ZSI6MjQwMDAwMDAwMDAwLCJ1cGRhdGUiOjI0MDAwMDAwMDAwMH19",
-          "dependencies": [
-            "google_storage_bucket.bucket"
-          ]
-        }
-      ]
-    },
-    {
-      "mode": "managed",
-      "type": "google_storage_notification",
-      "name": "notify_uploads",
-      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
-      "instances": [
-        {
-          "schema_version": 0,
-          "attributes": {
-            "bucket": "cso-exercise-ingestion-raw",
-            "custom_attributes": {},
-            "event_types": [
-              "OBJECT_FINALIZE"
-            ],
-            "id": "cso-exercise-ingestion-raw/notificationConfigs/1",
-            "notification_id": "1",
-            "object_name_prefix": "",
-            "payload_format": "JSON_API_V1",
-            "self_link": "https://www.googleapis.com/storage/v1/b/cso-exercise-ingestion-raw/notificationConfigs/1",
-            "topic": "//pubsub.googleapis.com/projects/cso-deng-pipeline/topics/gcs-new-file-topic"
-          },
-          "sensitive_attributes": [],
-          "identity_schema_version": 0,
-          "private": "bnVsbA==",
-          "dependencies": [
-            "data.google_project.project",
-            "google_pubsub_topic.gcs_notifications",
-            "google_pubsub_topic_iam_member.allow_gcs_publish",
-            "google_storage_bucket.bucket"
-          ]
         }
       ]
     }
