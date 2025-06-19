@@ -37,7 +37,7 @@ jobs:
       - name: Package Cloud Function
         run: |
          cd functions
-          zip -r ../function-source.zip .
+          zip -r ../gcp-terraform/function-source.zip .
     
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
