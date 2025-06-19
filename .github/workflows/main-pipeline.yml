@@ -9,6 +9,7 @@ on:
       - 'schemas/**'
       - 'gcp/**'
       - 'pipelines/**'
+  workflow_dispatch:
 
 jobs:
   pipeline:
