@@ -9,6 +9,7 @@ on:
       - 'schemas/**'
       - 'gcp/**'
       - 'pipelines/**'
+  workflow_dispatch:
 
 jobs:
   pipeline:
@@ -35,8 +36,8 @@ jobs:
 
       - name: Terraform Init & Apply
         run: |
-          terraform -chdir=gcp init
-          terraform -chdir=gcp apply -auto-approve
+          terraform -chdir=gcp-terraform init
+          terraform -chdir=gcp-terraform apply -auto-approve
 
       - name: Build & Push Flex Template Image
         run: |

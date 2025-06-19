@@ -1,4 +1,3 @@
-# .gitignore in gcs-bucket-terraform/
 
 # Ignore Terraform backup files
 terraform.tfstate.backup
