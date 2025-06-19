@@ -129,6 +129,10 @@ resource "google_storage_bucket_object" "function_source" {
   source = "function-source.zip"
 }
 
+output "current_region" {
+  value = var.region
+}
+
 resource "google_cloudfunctions2_function" "gcs_trigger" {
   name     = "trigger-dataflow-job"
   location = var.region
@@ -136,7 +140,7 @@ resource "google_cloudfunctions2_function" "gcs_trigger" {
 
   build_config {
     runtime     = "python311"
-    entry_point = "trigger_dataflow"
+    entry_point = "trigger_dataflow"  # your function name inside main.py
     source {
       storage_source {
         bucket = google_storage_bucket.bucket.name
@@ -156,8 +160,9 @@ resource "google_cloudfunctions2_function" "gcs_trigger" {
   }
 
   event_trigger {
-    event_type = "google.cloud.pubsub.topic.v1.messagePublished"
+    event_type   = "google.cloud.pubsub.topic.v1.messagePublished"
     pubsub_topic = google_pubsub_topic.gcs_notifications.id
     retry_policy = "RETRY_POLICY_DO_NOT_RETRY"
   }
 }
+
