@@ -1,0 +1,18 @@
+{
+  "name": "CSO Flex Template",
+  "description": "Pipeline to load CSVs to BigQuery",
+  "parameters": [
+    {
+      "name": "inputFile",
+      "label": "Input CSV File",
+      "helpText": "GCS path to input CSV",
+      "isOptional": false
+    },
+    {
+      "name": "schemaFile",
+      "label": "Input Schema File",
+      "helpText": "GCS path to schema file",
+      "isOptional": false
+    }
+  ]
+}

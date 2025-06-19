@@ -1,5 +1,5 @@
 customer_id,first_name,last_name,email,date_of_birth,phone,city,postcode,valid_from_dttm,valid_to_dttm
-CUST001,Emma,Johnson,emma.johnson@example.co.uk,1990-04-23,+44 7700 900123,London,SW11AA,2020-01-01T00:00:00Z,5999-12-31T23:59:59Z
+CUST001,Emma,Johnson,emma.johnson@example.co.uk,1990-04-24,+44 7700 900123,London,SW11AA,2020-01-01T00:00:00Z,5999-12-31T23:59:59Z
 CUST002,Liam,Smith,liam.smith@example.co.uk,1993-07-16,+44 7700 900124,Manchester,M1 1AE,2019-06-15T00:00:00Z,5999-12-31T23:59:59Z
 CUST003,Olivia,Brown,olivia.brown@example.co.uk,1982-08-01,+44 7700 900125,Birmingham,B1 1BB,2021-03-22T00:00:00Z,5999-12-31T23:59:59Z
 CUST004,Noah,Williams,noah.williams@example.co.uk,1975-02-11,+44 7700 900126,Glasgow,G11XX,2022-08-10T00:00:00Z,5999-12-31T23:59:59Z

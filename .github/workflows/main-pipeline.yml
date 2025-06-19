@@ -1,0 +1,77 @@
+name: End-to-End Data Ingestion
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'data/**'
+      - 'schemas/**'
+      - 'gcp/**'
+      - 'pipelines/**'
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_ID: cso-deng-pipeline
+      REGION: europe-west2
+      BUCKET_NAME: cso-exercise-ingestion-raw
+      DATAFLOW_TEMPLATE_PATH: gs://cso-exercise-ingestion-raw/templates/cso-dataflow-template.json
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_PROJECT_KEY }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init & Apply
+        run: |
+          terraform -chdir=gcp init
+          terraform -chdir=gcp apply -auto-approve
+
+      - name: Build & Push Flex Template Image
+        run: |
+          IMAGE_URI=gcr.io/${{ env.PROJECT_ID }}/dataflow-flex-template:latest
+          gcloud auth configure-docker
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
+
+      - name: Create Flex Template JSON
+        run: |
+          gcloud dataflow flex-template build ${{ env.DATAFLOW_TEMPLATE_PATH }} \
+            --image gcr.io/${{ env.PROJECT_ID }}/dataflow-flex-template:latest \
+            --sdk-language "PYTHON" \
+            --metadata-file metadata.json
+
+      - name: Package Cloud Function
+        run: |
+          cd functions
+          zip -r ../function-source.zip .
+
+      - name: Upload Function Code
+        run: |
+          gsutil cp function-source.zip gs://${{ env.BUCKET_NAME }}/function-source.zip
+  
+      - name: Upload Schema & CSV
+        run: |
+          gsutil cp schemas/* gs://${{ env.BUCKET_NAME }}/schemas/
+          gsutil cp data/* gs://${{ env.BUCKET_NAME }}/data/
+
+      - name: Trigger Dataflow Job
+        run: |
+          FILE=$(basename $(ls data/*.csv))
+          SCHEMA=$(basename $(ls schemas/*.json))
+          gcloud dataflow flex-template run "run-$FILE-$(date +%s)" \
+            --project=${{ env.PROJECT_ID }} \
+            --region=${{ env.REGION }} \
+            --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
+            --parameters inputFile=gs://${{ env.BUCKET_NAME }}/data/$FILE,schemaFile=gs://${{ env.BUCKET_NAME }}/schemas/$SCHEMA
