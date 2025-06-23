@@ -26,6 +26,11 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_PROJECT_KEY }}
 
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
       - name: Package Cloud Function
         run: |
           cd functions
