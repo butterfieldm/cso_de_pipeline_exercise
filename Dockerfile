@@ -1,4 +1,4 @@
-FROM gcr.io/dataflow-templates-base/python3-template-launcher-base
+FROM gcr.io/dataflow-templates-base/python3-template-launcher-base:python3.11
 
 WORKDIR /dataflow-template
 
