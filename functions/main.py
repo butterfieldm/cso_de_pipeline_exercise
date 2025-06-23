@@ -1,33 +1,27 @@
 import functions_framework
 import os
 import time
-import build
+from googleapiclient.discovery import build
 from google.oauth2 import service_account
 
 @functions_framework.cloud_event
 def trigger_dataflow(cloud_event):
     data = cloud_event.data
 
-    # Only react to CSV files
     if not data.get("name", "").endswith(".csv"):
         print("Not a CSV file. Skipping.")
         return
 
     file_name = data['name']
     bucket_name = data['bucket']
-    base_name = file_name.split('.')[0]
-    schema_file_name = f"{base_name}_schema.json"
 
     if not file_name.startswith("data/"):
         print("Not in 'data/' folder, skipping.")
         return
 
-    csv_gcs_path = f"gs://{bucket_name}/data/{file_name}"
-    schema_gcs_path = f"gs://{bucket_name}/schemas/{schema_file_name}"
+    job_name = f"cso-dataflow-job-{file_name.replace('/', '-').replace('_', '-')}-{int(time.time())}"
 
-    job_name = f"cso-dataflow-job-{base_name.replace('_', '-')}-{int(time.time())}"
-
-    # Get environment variables
+    # Environment variables
     project = os.environ["GCP_PROJECT"]
     region = os.environ["REGION"]
     template_path = os.environ["TEMPLATE_GCS_PATH"]
@@ -43,9 +37,9 @@ def trigger_dataflow(cloud_event):
             "jobName": job_name,
             "containerSpecGcsPath": template_path,
             "parameters": {
-                "input_file": csv_gcs_path,
-                "schema_file": schema_gcs_path,
-                "table_name": base_name
+                "data_bucket": bucket_name,
+                "data_prefix": "data/",   # Can make this dynamic if needed
+                "project": project
             }
         }
     }
@@ -58,4 +52,3 @@ def trigger_dataflow(cloud_event):
     response = request.execute()
 
     print(f"Launched Dataflow job: {response}")
-
