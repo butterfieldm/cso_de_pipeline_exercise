@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROJECT_ID: cso-deng-pipeline
-      REGION: europe-west2
+      REGION: us-central1
       BUCKET_NAME: cso-exercise-ingestion-raw
       DATAFLOW_TEMPLATE_PATH: gs://cso-exercise-ingestion-raw/templates/cso-dataflow-template.json
 
