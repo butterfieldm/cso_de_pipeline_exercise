@@ -39,7 +39,8 @@ def trigger_dataflow(cloud_event):
             "containerSpecGcsPath": template_path,
             "parameters": {
                 "input_file": csv_gcs_path,
-                "schema_file": schema_gcs_path
+                "schema_file": schema_gcs_path,
+                "table_name": base_name
             }
         }
     }
