@@ -11,8 +11,15 @@
     {
       "name": "table_name",
       "label": "Target Table Name",
-      "helpText": "Target Table Name",
+      "helpText": "GCS path to target table name",
+      "isOptional": false
+    },
+    {
+      "name": "schema_file",
+      "label": "Schema File",
+      "helpText": "GCS path to schema JSON file",
       "isOptional": false
     }
+    
   ]
 }

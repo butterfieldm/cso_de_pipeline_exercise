@@ -4,3 +4,4 @@ transactions_test.csv
 #Python venv
 lloy_venv
 test_workflows/
+test.sh

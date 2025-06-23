@@ -38,8 +38,8 @@ def trigger_dataflow(cloud_event):
             "jobName": job_name,
             "containerSpecGcsPath": template_path,
             "parameters": {
-                "inputFile": csv_gcs_path,
-                "schemaFile": schema_gcs_path
+                "input_file": csv_gcs_path,
+                "schema_file": schema_gcs_path
             }
         }
     }

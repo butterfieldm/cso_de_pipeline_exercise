@@ -10,49 +10,43 @@ import os
 import logging
 import argparse
 
-# === Load BigQuery schema dynamically ===
-def load_bq_schema_from_file(table_name):
-    schema_path = f'schemas/{table_name}_schema.json'
-    with open(schema_path) as f:
+# === Load BigQuery schema from GCS ===
+def load_bq_schema_from_gcs(bucket, table_name):
+    schema_path = f'gs://{bucket}/schemas/{table_name}_schema.json'
+    gcs = GcsIO()
+    with gcs.open(schema_path, 'r') as f:
         schema_json = json.load(f)
-    return {
-        'fields': schema_json
-    }
+    return {'fields': schema_json}
 
-# === DoFn to extract metadata from Pub/Sub ===
-class ExtractFileInfo(beam.DoFn):
-    def process(self, element):
-        payload = json.loads(element.decode('utf-8'))
-        gcs_path = payload['name']
-        filename = os.path.basename(gcs_path)
+# === Get all matching CSVs from a GCS prefix ===
+def list_csv_files(bucket, prefix):
+    gcs = GcsIO()
+    return [f'gs://{bucket}/{f}' for f in gcs.list_prefix(f'{bucket}/{prefix}') if f.endswith('.csv')]
 
-        # Only match CSV files with the expected pattern
-        match = re.match(r"([a-zA-Z]+)\.csv", filename, re.IGNORECASE)
-        if not match:
-            # Skip files that do not match the expected naming pattern
-            return
+# === Extract metadata from GCS path ===
+class ExtractFileMetadata(beam.DoFn):
+    def process(self, file_path):
+        filename = os.path.basename(file_path)
+        match = re.match(r"([a-zA-Z0-9_]+)\.csv", filename)
+        if match:
+            table_name = match.group(1).lower()
+            yield {
+                'filename': filename,
+                'table_name': table_name,
+                'gcs_path': file_path
+            }
 
-        raw_table_name = match.group(1).lower()
-
-        yield {
-            "filename": filename,
-            "table_name": raw_table_name,
-            "gcs_path": f"gs://{payload['bucket']}/{gcs_path}"
-        }
-
-# === Parse and validate CSVs ===
+# === Parse and validate CSV rows ===
 class ParseAndValidateCSV(beam.DoFn):
-    def __init__(self, schemas_dir='schemas/'):
-        self.schemas_dir = schemas_dir
+    def __init__(self, schema_bucket):
+        self.schema_bucket = schema_bucket
         self.schemas_cache = {}
 
     def get_schema(self, table_name):
         if table_name not in self.schemas_cache:
-            schema_filename = f'{table_name}_schema.json'
-            gcs_path = f'gs://cso-exercise-ingestion-raw/schemas/{schema_filename}'
-
+            schema_path = f'gs://{self.schema_bucket}/schemas/{table_name}_schema.json'
             gcs = GcsIO()
-            with gcs.open(gcs_path, 'r') as f:
+            with gcs.open(schema_path, 'r') as f:
                 schema_json = json.load(f)
 
             json_schema = {
@@ -77,106 +71,102 @@ class ParseAndValidateCSV(beam.DoFn):
         }.get(bq_type, "string")
 
     def process(self, element):
-            file_path = element['gcs_path']
-            table_name = element['table_name']
-
-            try:
-                with beam.io.filesystems.FileSystems.open(file_path) as f:
-                    raw_bytes = f.read()
-                text = raw_bytes.decode('utf-8', errors='replace').replace('\x00', '')
-                lines = text.splitlines()
-
-                reader = csv.DictReader(lines)
-
-                for i, row in enumerate(reader, start=1):
-                    try:
-                        if not row or any(v is None for v in row.values()):
-                            error_info = {
-                                'table_name': table_name,
-                                'error': f'Invalid row {i}: {row}',
-                                'row': row,
-                            }
-                            yield pvalue.TaggedOutput('error', error_info)
-                            continue
-
-                        valid_row = {
-                            **row,
-                            'source_file': file_path,
-                            'table_name': table_name
-                        }
-                        yield pvalue.TaggedOutput('valid', valid_row)
-
-                    except Exception as row_e:
-                        error_info = {
-                            'table_name': table_name,
-                            'error': f'Error processing row {i}: {row_e}',
-                            'row': row
-                        }
-                        yield pvalue.TaggedOutput('error', error_info)
-
-            except Exception as e:
-                error_info = {
-                    'table_name': table_name,
-                    'error': f'Failed to read/process file: {e}',
-                    'row': None
-                }
-                yield pvalue.TaggedOutput('error', error_info)
-
-
-# === Attach schema for valid rows ===
-class AddSchema(beam.DoFn):
-    def process(self, element):
-        row = element['row']
+        file_path = element['gcs_path']
         table_name = element['table_name']
-        schema = load_bq_schema_from_file(table_name)
+
+        try:
+            with beam.io.filesystems.FileSystems.open(file_path) as f:
+                raw_bytes = f.read()
+            text = raw_bytes.decode('utf-8', errors='replace').replace('\x00', '')
+            lines = text.splitlines()
+
+            reader = csv.DictReader(lines)
+
+            for i, row in enumerate(reader, start=1):
+                try:
+                    if not row or any(v is None for v in row.values()):
+                        yield pvalue.TaggedOutput('error', {
+                            'table_name': table_name,
+                            'error': f'Invalid row {i}: {row}',
+                            'row': row
+                        })
+                        continue
+
+                    valid_row = {
+                        **row,
+                        'source_file': file_path,
+                        'table_name': table_name
+                    }
+                    yield pvalue.TaggedOutput('valid', valid_row)
+
+                except Exception as row_e:
+                    yield pvalue.TaggedOutput('error', {
+                        'table_name': table_name,
+                        'error': f'Error processing row {i}: {row_e}',
+                        'row': row
+                    })
+
+        except Exception as e:
+            yield pvalue.TaggedOutput('error', {
+                'table_name': table_name,
+                'error': f'Failed to process file: {e}',
+                'row': None
+            })
+
+# === Attach schema ===
+class AttachSchema(beam.DoFn):
+    def __init__(self, schema_bucket):
+        self.schema_bucket = schema_bucket
+
+    def process(self, element):
+        schema = load_bq_schema_from_gcs(self.schema_bucket, element['table_name'])
         yield {
-            'row': row,
-            'table_name': table_name,
+            **element,
             'schema': schema
         }
 
-# === Main pipeline run ===
+# === Main run ===
 def run(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_file', required=True, help='GCS path to the input CSV')
-    parser.add_argument('--table_name', required=True, help='Target table name for BQ')
+    parser.add_argument('--data_bucket', required=True, help='GCS bucket name')
+    parser.add_argument('--data_prefix', required=True, help='Prefix path to CSVs, e.g. data/')
+    parser.add_argument('--project', required=True)
     known_args, pipeline_args = parser.parse_known_args(argv)
 
     pipeline_options = PipelineOptions(pipeline_args)
     pipeline_options.view_as(SetupOptions).save_main_session = True
     pipeline_options.view_as(StandardOptions).streaming = False
 
+    gcs = GcsIO()
+    input_files = list_csv_files(known_args.data_bucket, known_args.data_prefix)
+
     with beam.Pipeline(options=pipeline_options) as p:
-        metadata = p | 'Create file metadata' >> beam.Create([{
-            "filename": os.path.basename(known_args.input_file),
-            "table_name": known_args.table_name,
-            "gcs_path": known_args.input_file
-        }])
+        files = p | 'Create file list' >> beam.Create(input_files)
+        metadata = files | 'Extract metadata' >> beam.ParDo(ExtractFileMetadata())
 
-        parsed = metadata | 'Parse and validate CSV' >> beam.ParDo(ParseAndValidateCSV()).with_outputs('valid', 'error')
-
+        parsed = metadata | 'Parse & Validate' >> beam.ParDo(ParseAndValidateCSV(known_args.data_bucket)).with_outputs('valid', 'error')
         valid = parsed.valid
         errors = parsed.error
 
-        valid | 'Load schema' >> beam.ParDo(AddSchema()) \
-              | 'Write to BigQuery' >> WriteToBigQuery(
-                    table=lambda e: f"cso-deng-pipeline.cso_exercise_bq_staging.{e['table_name']}",
+        valid | 'Attach schema' >> beam.ParDo(AttachSchema(known_args.data_bucket)) \
+              | 'Write valid to BQ' >> WriteToBigQuery(
+                    table=lambda e: f"{known_args.project}:cso_exercise_bq_staging.{e['table_name']}",
                     schema=lambda e: e['schema'],
                     write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
                     create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
                 )
 
-        errors | 'Write errors to BQ' >> beam.Map(lambda r: {
-                    "table": r["table_name"],
-                    "error": r["error"],
-                    "raw_row": json.dumps(r["row"])
-                }) | WriteToBigQuery(
-                    table="cso-deng-pipeline.cso_exercise_bq_error_hospital.error_log",
+        errors | 'Format error records' >> beam.Map(lambda r: {
+                    'table': r['table_name'],
+                    'error': r['error'],
+                    'raw_row': json.dumps(r['row'])
+                }) | 'Write errors to BQ' >> WriteToBigQuery(
+                    table=f"{known_args.project}:cso_exercise_bq_error_hospital.error_log",
                     schema={
                         'fields': [
-                            {"name": "table", "type": "STRING"},
-                            {"name": "error", "type": "STRING"},
-                            {"name": "raw_row", "type": "STRING"}
+                            {'name': 'table', 'type': 'STRING'},
+                            {'name': 'error', 'type': 'STRING'},
+                            {'name': 'raw_row', 'type': 'STRING'}
                         ]
                     },
                     write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
