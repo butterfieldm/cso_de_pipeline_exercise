@@ -44,16 +44,16 @@ jobs:
 
       - name: Build & Push Flex Template Image
         run: |
-          IMAGE_URI=gcr.io/${{ env.PROJECT_ID }}/dataflow-flex-template:latest
+          IMAGE_URI=us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/gcf-artifacts/dataflow-flex-template:latest
           gcloud config set project ${{ env.PROJECT_ID }}
-          gcloud auth configure-docker --quiet
+          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
           docker build --no-cache -t $IMAGE_URI .
           docker push $IMAGE_URI
-
+        
       - name: Create Flex Template JSON
         run: |
           gcloud dataflow flex-template build ${{ env.DATAFLOW_TEMPLATE_PATH }} \
-            --image gcr.io/${{ env.PROJECT_ID }}/dataflow-flex-template:latest \
+            --image us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/gcf-artifacts/dataflow-flex-template:latest \
             --sdk-language "PYTHON" \
             --metadata-file metadata.json
 

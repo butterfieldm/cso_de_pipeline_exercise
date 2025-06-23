@@ -166,3 +166,16 @@ resource "google_cloudfunctions2_function" "gcs_trigger" {
   }
 }
 
+resource "google_artifact_registry_repository" "dataflow_flex_templates" {
+  provider = google
+  location = var.region
+  repository_id = "gcf-artifacts"
+  description  = "Artifact Registry for Flex Template Docker Images"
+  format       = "DOCKER"
+}
+
+resource "google_project_iam_member" "artifact_registry_writer" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${var.cicd_service_account_email}"
+}
