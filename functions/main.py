@@ -10,12 +10,17 @@ def trigger_dataflow(cloud_event):
 
     # Only react to CSV files
     if not data.get("name", "").endswith(".csv"):
-        return "Not a CSV file. Skipping."
+        print("Not a CSV file. Skipping.")
+        return
 
     file_name = data['name']
     bucket_name = data['bucket']
     base_name = file_name.split('.')[0]
     schema_file_name = f"{base_name}_schema.json"
+
+    if not file_name.startswith("data/"):
+        print("Not in 'data/' folder, skipping.")
+        return
 
     csv_gcs_path = f"gs://{bucket_name}/data/{file_name}"
     schema_gcs_path = f"gs://{bucket_name}/schemas/{schema_file_name}"

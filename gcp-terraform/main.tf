@@ -91,15 +91,6 @@ resource "google_storage_notification" "notify_uploads" {
   ]
 }
 
-resource "google_pubsub_topic" "gcs_upload_topic" {
-  name = "gcs-file-drop-topic"
-}
-
-resource "google_pubsub_subscription" "gcs_upload_sub" {
-  name  = "gcs-upload-sub"
-  topic = google_pubsub_topic.gcs_upload_topic.name
-}
-
 resource "google_project_service" "pubsub" {
   project = var.project_id
   service = "pubsub.googleapis.com"
