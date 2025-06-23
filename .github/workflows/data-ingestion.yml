@@ -42,13 +42,14 @@ jobs:
             base=$(basename "$csvfile" .csv)
             schemafile="schemas/${base}_schema.json"
             if [[ -f "$schemafile" ]]; then
-              echo "Launching Dataflow for $csvfile with schema $schemafile"
+             echo "Launching Dataflow for $csvfile with schema $schemafile"
               gcloud dataflow flex-template run "run-${base}-$(date +%s)" \
                 --project=${{ env.PROJECT_ID }} \
                 --region=${{ env.REGION }} \
                 --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
-                --parameters inputFile=gs://${{ env.BUCKET_NAME }}/data/${base}.csv,schemaFile=gs://${{ env.BUCKET_NAME }}/schemas/${base}_schema.json
+                --parameters input_file=gs://${{ env.BUCKET_NAME }}/data/${base}.csv,table_name=${base}
             else
               echo "No matching schema for $csvfile, skipping."
             fi
           done
+      

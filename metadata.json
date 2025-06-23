@@ -3,15 +3,14 @@
   "description": "Pipeline to load CSVs to BigQuery",
   "parameters": [
     {
-      "name": "inputFile",
+      "name": "input_file",
       "label": "Input CSV File",
       "helpText": "GCS path to input CSV",
       "isOptional": false
     },
     {
-      "name": "schemaFile",
-      "label": "Input Schema File",
-      "helpText": "GCS path to schema file",
+      "name": "table_name",
+      "label": "Target Table Name",
       "isOptional": false
     }
   ]
