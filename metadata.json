@@ -11,6 +11,7 @@
     {
       "name": "table_name",
       "label": "Target Table Name",
+      "helpText": "Target Table Name",
       "isOptional": false
     }
   ]
