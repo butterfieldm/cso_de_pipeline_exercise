@@ -174,8 +174,3 @@ resource "google_artifact_registry_repository" "dataflow_flex_templates" {
   format       = "DOCKER"
 }
 
-resource "google_project_iam_member" "artifact_registry_writer" {
-  project = var.project_id
-  role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:${var.cicd_service_account_email}"
-}
