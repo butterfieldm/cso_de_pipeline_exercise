@@ -47,7 +47,7 @@ jobs:
           IMAGE_URI=gcr.io/${{ env.PROJECT_ID }}/dataflow-flex-template:latest
           gcloud config set project ${{ env.PROJECT_ID }}
           gcloud auth configure-docker --quiet
-          docker build -t $IMAGE_URI .
+          docker build --no-cache -t $IMAGE_URI .
           docker push $IMAGE_URI
 
       - name: Create Flex Template JSON
