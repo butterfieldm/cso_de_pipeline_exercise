@@ -10,7 +10,7 @@
       "mode": "REQUIRED"
     },
     {
-      "name": "transaction_date",
+      "name": "transaction_dttm",
       "type": "TIMESTAMP",
       "mode": "REQUIRED"
     },

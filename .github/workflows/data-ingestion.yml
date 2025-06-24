@@ -47,9 +47,8 @@ jobs:
               --project=${{ env.PROJECT_ID }} \
               --region=${{ env.REGION }} \
               --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
-              --parameters "input_file=gs://${{ env.BUCKET_NAME }}/data/${base}.csv,table_name=${base},schema_file=gs://${{ env.BUCKET_NAME }}/schemas/${base}_schema.json"            
+              --parameters "data_bucket=${{ env.BUCKET_NAME }},data_prefix=data/,project=${{ env.PROJECT_ID }}"            
             else
               echo "No matching schema for $csvfile, skipping."
             fi
           done
-      
