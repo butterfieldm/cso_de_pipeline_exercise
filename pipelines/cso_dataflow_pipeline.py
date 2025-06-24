@@ -3,7 +3,6 @@ from apache_beam.options.pipeline_options import PipelineOptions, StandardOption
 from apache_beam.io.gcp.bigquery import WriteToBigQuery
 from apache_beam.io.gcp.gcsio import GcsIO
 from apache_beam import pvalue
-
 import csv
 import json
 import re
@@ -12,6 +11,7 @@ import logging
 import argparse
 from io import TextIOWrapper
 from jsonschema import validate, ValidationError
+from datetime import datetime, timezone
 
 # === Load JSON schema from GCS and convert to JSON Schema spec ===
 def load_json_schema(bucket, table_name):
@@ -153,21 +153,22 @@ def run(argv=None):
             'table': r['table_name'],
             'error': r['error'],
             'file_path': r['file_path'],
-            'raw_row': json.dumps(r['row']) if r['row'] else None
+            'raw_row': json.dumps(r['row']) if r['row'] else None,
+            'ingestion_ts': datetime.now(timezone.utc).isoformat()
         }) | 'Write errors to BQ' >> WriteToBigQuery(
             table=f"{project}:cso_exercise_bq_error_hospital.error_log",
             schema={
                 'fields': [
-                    {'name': 'table', 'type': 'STRING'},
-                    {'name': 'error', 'type': 'STRING'},
-                    {'name': 'file_path', 'type': 'STRING'},
-                    {'name': 'raw_row', 'type': 'STRING'}
-                ]
+                        { "name": "table", "type": "STRING", "mode": "REQUIRED" },
+                        { "name": "error", "type": "STRING", "mode": "REQUIRED" },
+                        { "name": "file_path", "type": "STRING", "mode": "NULLABLE" },
+                        { "name": "raw_row", "type": "STRING", "mode": "NULLABLE" },
+                        { "name": "ingestion_ts", "type": "TIMESTAMP", "mode": "REQUIRED" }
+                        ]
             },
             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
             create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
         )
-
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
