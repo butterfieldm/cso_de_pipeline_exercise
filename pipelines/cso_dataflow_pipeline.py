@@ -131,11 +131,12 @@ def run(argv=None):
     parser.add_argument('--data_bucket', required=True, help='GCS bucket name')
     parser.add_argument('--data_prefix', required=True, help='Prefix path to CSVs, e.g. data/')
     parser.add_argument('--project', required=True)
-    known_args, pipeline_args = parser.parse_known_args(argv)
 
-    pipeline_options = PipelineOptions(pipeline_args)
+    pipeline_options = PipelineOptions(argv)  # Use full argv for Beam options
     pipeline_options.view_as(SetupOptions).save_main_session = True
     pipeline_options.view_as(StandardOptions).streaming = False
+
+    known_args, _ = parser.parse_known_args(argv)  # parse your args after
 
     gcs = GcsIO()
     input_files = list_csv_files(known_args.data_bucket, known_args.data_prefix)
