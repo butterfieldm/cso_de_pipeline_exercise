@@ -21,12 +21,7 @@ def load_bq_schema_from_gcs(bucket, table_name):
 # === Get all matching CSVs from a GCS prefix ===
 def list_csv_files(bucket, prefix):
     gcs = GcsIO()
-    return [
-        f'gs://{bucket}/{f}' 
-        for f in gcs.list_prefix(f'gs://{bucket}/{prefix}') 
-        if f.endswith('.csv')
-    ]
-
+    return [f for f in gcs.list_prefix(f'gs://{bucket}/{prefix}') if f.endswith('.csv')]
 
 # === Extract metadata from GCS path ===
 class ExtractFileMetadata(beam.DoFn):
@@ -141,7 +136,7 @@ def run(argv=None):
     pipeline_options.view_as(SetupOptions).save_main_session = True
     pipeline_options.view_as(StandardOptions).streaming = False
 
-    known_args, _ = parser.parse_known_args(argv)  # parse your args after
+    known_args, _ = parser.parse_known_args(argv)  # parse args after
 
     gcs = GcsIO()
     input_files = list_csv_files(known_args.data_bucket, known_args.data_prefix)
