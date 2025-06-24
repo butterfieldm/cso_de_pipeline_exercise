@@ -1,0 +1,108 @@
+name: Deploy and Ingest Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'gcp-terraform/**'
+      - 'functions/**'
+      - 'data/**'
+      - 'schemas/**'
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: cso-deng-pipeline
+  REGION: us-central1
+  BUCKET_NAME: cso-exercise-ingestion-raw
+  DATAFLOW_TEMPLATE_PATH: gs://cso-exercise-ingestion-raw/templates/cso-dataflow-template.json
+
+jobs:
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_PROJECT_KEY }}
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Package Cloud Function
+        run: |
+          cd functions
+          zip -r ../gcp-terraform/function-source.zip .
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init & Apply
+        working-directory: ./gcp-terraform
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Build & Push Flex Template Image
+        run: |
+          IMAGE_URI=us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/gcf-artifacts/dataflow-flex-template:latest
+          gcloud config set project ${{ env.PROJECT_ID }}
+          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+          docker build --no-cache -t $IMAGE_URI .
+          docker push $IMAGE_URI
+
+      - name: Create Flex Template JSON
+        run: |
+          gcloud dataflow flex-template build ${{ env.DATAFLOW_TEMPLATE_PATH }} \
+            --image us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/gcf-artifacts/dataflow-flex-template:latest \
+            --sdk-language "PYTHON" \
+            --metadata-file metadata.json
+
+      - name: Upload Function Code
+        run: |
+          gsutil cp gcp-terraform/function-source.zip gs://${{ env.BUCKET_NAME }}/function-source.zip
+
+
+  data-ingestion:
+    needs: deploy-infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_PROJECT_KEY }}
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Upload Schema & CSV
+        run: |
+          gsutil cp schemas/* gs://${{ env.BUCKET_NAME }}/schemas/
+          gsutil cp data/* gs://${{ env.BUCKET_NAME }}/data/
+
+      - name: Trigger Dataflow Jobs for all CSV files
+        run: |
+          for csvfile in data/*.csv; do
+            base=$(basename "$csvfile" .csv)
+            schemafile="schemas/${base}_schema.json"
+            if [[ -f "$schemafile" ]]; then
+              echo "Launching Dataflow for $csvfile with schema $schemafile"
+              gcloud dataflow flex-template run "run-${base}-$(date +%s)" \
+              --project=${{ env.PROJECT_ID }} \
+              --region=${{ env.REGION }} \
+              --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
+              --parameters "input_file=gs://${{ env.BUCKET_NAME }}/data/${base}.csv,table_name=${base},schema_file=gs://${{ env.BUCKET_NAME }}/schemas/${base}_schema.json"            
+            else
+              echo "No matching schema for $csvfile, skipping."
+            fi
+          done
