@@ -5,3 +5,4 @@ transactions_test.csv
 lloy_venv
 test_workflows/
 test.sh
+test_parse_validate.py

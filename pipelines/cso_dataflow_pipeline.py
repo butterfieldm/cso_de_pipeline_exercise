@@ -29,7 +29,10 @@ def load_json_schema(bucket, table_name):
         "required": [field["name"] for field in schema_fields if field["mode"] == "REQUIRED"]
     }
 
-    return json_schema, {"fields": schema_fields}
+    # Compose BigQuery schema string: "field1:TYPE,field2:TYPE,..."
+    bq_schema_str = ",".join(f"{field['name']}:{field['type']}" for field in schema_fields)
+
+    return json_schema, bq_schema_str
 
 def map_bq_type(bq_type):
     return {
@@ -70,18 +73,17 @@ class ParseValidateRows(beam.DoFn):
         file_path = element['gcs_path']
         table_name = element['table_name']
 
-        # Load schema and cache it
+        # Load schema and cache it as JSON Schema + BQ schema string
         if table_name not in self.schema_cache:
-            json_schema, bq_schema = load_json_schema(self.schema_bucket, table_name)
-            self.schema_cache[table_name] = (json_schema, bq_schema)
+            json_schema, bq_schema_str = load_json_schema(self.schema_bucket, table_name)
+            self.schema_cache[table_name] = (json_schema, bq_schema_str)
         else:
-            json_schema, bq_schema = self.schema_cache[table_name]
+            json_schema, bq_schema_str = self.schema_cache[table_name]
 
         try:
             with beam.io.filesystems.FileSystems.open(file_path) as f:
                 reader = csv.DictReader(TextIOWrapper(f, encoding='utf-8', errors='replace'))
 
-                # Optional header check
                 expected_fields = set(json_schema["properties"].keys())
                 actual_fields = set(reader.fieldnames)
                 if expected_fields != actual_fields:
@@ -91,14 +93,12 @@ class ParseValidateRows(beam.DoFn):
                     try:
                         validate(instance=row, schema=json_schema)
 
-                        # Prepare clean row with metadata and schema for Beam
                         valid_row = {
                             'table_name': table_name,
-                            'schema': bq_schema,
+                            'schema_str': bq_schema_str,
                             'source_file': file_path,
-                            **row  # CSV fields
+                            **row
                         }
-
                         yield pvalue.TaggedOutput('valid', valid_row)
 
                     except ValidationError as ve:
@@ -129,7 +129,6 @@ def run(argv=None):
     if not project:
         raise ValueError("Missing required PipelineOption: --project")
 
-    # Load matching files
     files = list_csv_files(args.data_bucket, args.data_prefix)
     logging.info(f"Found {len(files)} CSVs: {files}")
 
@@ -147,10 +146,10 @@ def run(argv=None):
         valid = parsed.valid
         errors = parsed.error
 
-        # Write valid rows
+        # Write valid rows using schema string
         valid | 'Write valid to BQ' >> WriteToBigQuery(
             table=lambda row: f"{project}:cso_exercise_bq_staging.{row['table_name']}",
-            schema=lambda row: row['schema'],
+            schema=lambda row: row['schema_str'],  # use schema string here
             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
             create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
         )
