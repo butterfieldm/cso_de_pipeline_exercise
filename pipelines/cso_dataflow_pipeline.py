@@ -90,12 +90,17 @@ class ParseValidateRows(beam.DoFn):
                 for i, row in enumerate(reader, start=1):
                     try:
                         validate(instance=row, schema=json_schema)
-                        row['source_file'] = file_path
-                        row['table_name'] = table_name
-                        yield pvalue.TaggedOutput('valid', {
-                            **row,
-                            'schema': bq_schema
-                        })
+
+                        # Prepare clean row with metadata and schema for Beam
+                        valid_row = {
+                            'table_name': table_name,
+                            'schema': bq_schema,
+                            'source_file': file_path,
+                            **row  # CSV fields
+                        }
+
+                        yield pvalue.TaggedOutput('valid', valid_row)
+
                     except ValidationError as ve:
                         yield pvalue.TaggedOutput('error', {
                             'table_name': table_name,
@@ -136,7 +141,9 @@ def run(argv=None):
         metadata = file_list | 'Extract metadata' >> beam.ParDo(ExtractFileMetadata())
 
         parsed = metadata | 'Parse and validate' >> beam.ParDo(ParseValidateRows(args.data_bucket)).with_outputs('valid', 'error')
-
+        parsed.valid | 'Log valid rows' >> beam.Map(lambda x: logging.info(f"VALID OUTPUT: {x}"))
+        parsed.error | 'Log error rows' >> beam.Map(lambda x: logging.info(f"ERROR OUTPUT: {x}"))
+        
         valid = parsed.valid
         errors = parsed.error
 
