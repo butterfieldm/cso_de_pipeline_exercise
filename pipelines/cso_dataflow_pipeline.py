@@ -117,14 +117,17 @@ def run(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_bucket', required=True)
     parser.add_argument('--data_prefix', required=True)
-    parser.add_argument('--project', required=True)
     args, pipeline_args = parser.parse_known_args(argv)
+
+    options = PipelineOptions(pipeline_args)
+    project = options.get_all_options().get("project")
+    if not project:
+        raise ValueError("Missing required PipelineOption: --project")
 
     # Load matching files
     files = list_csv_files(args.data_bucket, args.data_prefix)
     logging.info(f"Found {len(files)} CSVs: {files}")
 
-    options = PipelineOptions(pipeline_args)
     options.view_as(SetupOptions).save_main_session = True
     options.view_as(StandardOptions).streaming = False
 
@@ -139,7 +142,7 @@ def run(argv=None):
 
         # Write valid rows
         valid | 'Write valid to BQ' >> WriteToBigQuery(
-            table=lambda row: f"{args.project}:cso_exercise_bq_staging.{row['table_name']}",
+            table=lambda row: f"{project}:cso_exercise_bq_staging.{row['table_name']}",
             schema=lambda row: row['schema'],
             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
             create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
@@ -152,7 +155,7 @@ def run(argv=None):
             'file_path': r['file_path'],
             'raw_row': json.dumps(r['row']) if r['row'] else None
         }) | 'Write errors to BQ' >> WriteToBigQuery(
-            table=f"{args.project}:cso_exercise_bq_error_hospital.error_log",
+            table=f"{project}:cso_exercise_bq_error_hospital.error_log",
             schema={
                 'fields': [
                     {'name': 'table', 'type': 'STRING'},
@@ -164,6 +167,7 @@ def run(argv=None):
             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
             create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
         )
+
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
