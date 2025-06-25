@@ -73,7 +73,7 @@ jobs:
             FILE_LIST="${{ steps.changed.outputs.changed_files }}"
             echo "$FILE_LIST"
             # URL encode commas to %2C (this avoids breaking the gcloud CLI parsing)
-            ENCODED_FILE_LIST="${FILE_LIST//,/%%2C}"
+            ENCODED_FILE_LIST="${FILE_LIST//,/%2C}"
             echo "$ENCODED_FILE_LIST"
 
             PARAMS="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},data_prefix=data/,project=${{ env.PROJECT_ID }},changed_files=${FILE_LIST}"
