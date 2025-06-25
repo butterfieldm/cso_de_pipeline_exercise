@@ -5,13 +5,29 @@ from apache_beam.io import ReadFromText
 import json
 import jsonschema
 from google.cloud import storage
+import yaml
+import datetime
+
+def load_mapping(schema_bucket, mapping_path):
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(schema_bucket)
+    blob = bucket.blob(mapping_path)
+    content = blob.download_as_text()
+
+    if mapping_path.endswith('.yaml') or mapping_path.endswith('.yml'):
+        mapping = yaml.safe_load(content)
+    else:
+        mapping = json.loads(content)
+    return mapping
 
 class ValidateAndFormat(beam.DoFn):
-    def __init__(self, schema_bucket, schema_path):
+    def __init__(self, schema_bucket, schema_path, file_path, header):
         self.schema_bucket = schema_bucket
         self.schema_path = schema_path
         self.schema = None
         self.storage_client = None
+        self.file_path = file_path
+        self.header = header.split(',')  # list of header names
 
     def setup(self):
         self.storage_client = storage.Client()
@@ -20,41 +36,72 @@ class ValidateAndFormat(beam.DoFn):
         self.schema = json.loads(schema_data)
 
     def process(self, element):
-        # element is a CSV line (string)
-        # parse CSV line, validate with JSON schema, output dict if valid
 
-        import csv
-        from io import StringIO
+        # element is one CSV data row string, e.g. "123,abc,456"
+        values = element.split(',')
+        row = dict(zip(self.header, values))
 
-        reader = csv.DictReader(StringIO(element))
-        for row in reader:
-            try:
-                jsonschema.validate(instance=row, schema=self.schema)
-                yield row  # valid row dict
-            except jsonschema.ValidationError:
-                # skip invalid rows or log them somewhere else
-                pass
+        try:
+            jsonschema.validate(instance=row, schema=self.schema)
+            yield row
+        except jsonschema.ValidationError as e:
+            yield beam.pvalue.TaggedOutput(
+                'errors',
+                {
+                    'table': self.schema_path.split('/')[-1].replace('_schema.json', ''),
+                    'error': str(e),
+                    'file_path': self.file_path,
+                    'raw_row': str(row),
+                    'ingestion_ts': datetime.datetime.utcnow().isoformat()
+                }
+            )
 
-def run(pipeline_args, data_bucket, schema_bucket, changed_files):
+
+def run(pipeline_args, data_bucket, schema_bucket, changed_files, project):
     options = PipelineOptions(pipeline_args)
     p = beam.Pipeline(options=options)
 
-    for file_path in changed_files:
-        # file_path example: 'data/customers.csv'
-        filename = file_path.split('/')[-1].replace('.csv', '')
-        schema_path = f"schemas/{filename}.json"
-        bq_table = f"your-project.your_dataset.{filename}"
+    mapping = load_mapping(schema_bucket, 'config/mappings.yaml')
 
-        rows = (
+    for file_path in changed_files:
+        # Find mapping entry
+        entry = next((m for m in mapping['mappings'] if m['csv_path'] == file_path), None)
+        if not entry:
+            raise ValueError(f"No mapping found for file {file_path}")
+
+        dataset = entry['dataset']
+        table = entry['table']
+        bq_table = f"{project}.{dataset}.{table}"
+
+    # rest of your pipeline: read CSV, validate, write to bq_table
+
+
+    error_hospital_table = f'{project}.cso_exercise_bq_error_hospital.error_log'
+
+    for file_path in changed_files:
+        filename = file_path.split('/')[-1].replace('.csv', '')
+        schema_path = f"schemas/{filename}_schema.json"
+        bq_table = f"{project}.{dataset}.{filename}"
+
+        validated_and_errors = (
             p
             | f"Read_{filename}" >> ReadFromText(f"gs://{data_bucket}/{file_path}", skip_header_lines=1)
-            | f"Validate_{filename}" >> beam.ParDo(ValidateAndFormat(schema_bucket, schema_path))
-            # Add any transformation / cleaning here
-            | f"WriteToBQ_{filename}" >> WriteToBigQuery(
-                bq_table,
-                write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
-                create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
-            )
+            | f"Validate_{filename}" >> beam.ParDo(ValidateAndFormat(schema_bucket, schema_path, file_path)).with_outputs('errors', main='valid_rows')
+        )
+
+        valid_rows = validated_and_errors.valid_rows
+        errors = validated_and_errors.errors
+
+        valid_rows | f"WriteToBQ_{filename}" >> WriteToBigQuery(
+            bq_table,
+            write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
+            create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
+        )
+
+        errors | f"WriteErrorsToBQ_{filename}" >> WriteToBigQuery(
+            error_hospital_table,
+            write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
+            create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
         )
 
     result = p.run()
@@ -68,8 +115,10 @@ if __name__ == "__main__":
     parser.add_argument("--schema_bucket", required=True)
     parser.add_argument("--changed_files", required=True,
                     help="List of changed CSV file paths in the bucket, e.g. data/customers.csv,data/orders.csv")
+    parser.add_argument("--project", required=True, help="GCP project ID")
+
     known_args, pipeline_args = parser.parse_known_args()
 
     # Parse comma-separated list string into a list
     changed_files = [f.strip() for f in known_args.changed_files.split(";") if f.strip()]
-    run(pipeline_args, known_args.data_bucket, known_args.schema_bucket, changed_files)
+    run(pipeline_args, known_args.data_bucket, known_args.schema_bucket, changed_files, known_args.project)

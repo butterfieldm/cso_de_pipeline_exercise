@@ -61,11 +61,31 @@ jobs:
         run: |
           echo "Changed files: ${{ steps.changed.outputs.changed_files }}"
         
-      - name: Upload Data and Schema to GCS
+      - name: Upload Changed CSV Files to GCS
         if: steps.changed.outputs.changed_files != ''
         run: |
-          gsutil cp schemas/* gs://${{ env.BUCKET_NAME }}/schemas/
-          gsutil cp data/* gs://${{ env.BUCKET_NAME }}/data/
+            IFS=';' read -ra FILES <<< "${{ steps.changed.outputs.changed_files }}"
+            for file in "${FILES[@]}"; do
+              echo "Uploading data file: $file"
+              gsutil cp "$file" gs://${{ env.BUCKET_NAME }}/data/
+              
+              # Extract filename without path and extension
+              fname=$(basename "$file" .csv)
+              
+              # Upload corresponding schema file if exists
+              schema_file="schemas/${fname}_schema.json"
+              if [ -f "$schema_file" ]; then
+                echo "Uploading schema file: $schema_file"
+                gsutil cp "$schema_file" gs://${{ env.BUCKET_NAME }}/schemas/
+              else
+                echo "Schema file $schema_file not found, skipping."
+              fi
+            done
+        
+
+      - name: Upload mapping config to GCS
+        run: |
+            gsutil cp mappings.yaml gs://${{ env.BUCKET_NAME }}/config/mappings.yaml
         
       - name: Trigger Dataflow Job for Changed CSVs
         if: steps.changed.outputs.changed_files != ''
