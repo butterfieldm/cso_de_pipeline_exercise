@@ -71,5 +71,5 @@ if __name__ == "__main__":
     known_args, pipeline_args = parser.parse_known_args()
 
     # Parse comma-separated list string into a list
-    changed_files = [f.strip() for f in known_args.changed_files.split(",") if f.strip()]
+    changed_files = [f.strip() for f in known_args.changed_files.split(";") if f.strip()]
     run(pipeline_args, known_args.data_bucket, known_args.schema_bucket, changed_files)
