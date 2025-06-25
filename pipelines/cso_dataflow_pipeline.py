@@ -29,16 +29,34 @@ class ValidateAndFormat(beam.DoFn):
         self.file_path = file_path
         self.header = None
 
+    def bq_to_jsonschema(self, bq_schema_fields):
+        type_map = {
+            "STRING": "string",
+            "FLOAT": "number",
+            "INTEGER": "integer",
+            "BOOLEAN": "boolean",
+            "TIMESTAMP": "string",
+            "DATE": "string"
+        }
+        return {
+            "type": "object",
+            "properties": {
+                f["name"]: {"type": type_map.get(f["type"], "string")}
+                for f in bq_schema_fields
+            },
+            "required": [f["name"] for f in bq_schema_fields if f["mode"] == "REQUIRED"]
+        }
+
     def setup(self):
         self.storage_client = storage.Client()
         schema_blob = self.storage_client.bucket(self.schema_bucket).blob(self.schema_path)
-        schema_data = schema_blob.download_as_text()
-        self.schema = json.loads(schema_data)
+        bq_schema = json.loads(schema_blob.download_as_text())
+        self.schema = self.bq_to_jsonschema(bq_schema)
 
     def process(self, element):
         if self.header is None:
             self.header = element.split(',')
-            return  # skip header row
+            return
 
         values = element.split(',')
         row = dict(zip(self.header, values))
