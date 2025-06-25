@@ -85,7 +85,7 @@ def run(pipeline_args, data_bucket, schema_bucket, changed_files, project):
         validated_and_errors = (
             p
             | f"Read_{filename}" >> ReadFromText(f"gs://{data_bucket}/{file_path}")
-            | f"Validate_{filename}" >> beam.ParDo(ValidateAndFormat(schema_bucket, schema_path, file_path, entry['header'])).with_outputs('errors', main='valid_rows')
+            | f"Validate_{filename}" >> beam.ParDo(ValidateAndFormat(schema_bucket, schema_path, file_path)).with_outputs('errors', main='valid_rows')
         )
 
         valid_rows = validated_and_errors.valid_rows
