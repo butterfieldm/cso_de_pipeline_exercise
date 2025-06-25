@@ -1,4 +1,6 @@
 {
+  "name": "cso-dataflow-template",
+  "description": "Flexible Dataflow pipeline for CSV ingestion",
   "parameters": [
     {
       "name": "data_bucket",
@@ -32,3 +34,4 @@
     }
   ]
 }
+  
