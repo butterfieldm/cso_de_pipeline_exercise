@@ -66,18 +66,27 @@ jobs:
         run: |
           gsutil cp schemas/* gs://${{ env.BUCKET_NAME }}/schemas/
           gsutil cp data/* gs://${{ env.BUCKET_NAME }}/data/
+        
+      - name: Create parameters file
+        if: steps.changed.outputs.changed_files != ''
+        run: |
+            echo "Creating parameters.json"
+            FILE_LIST="${{ steps.changed.outputs.changed_files }}"
+            cat <<EOF > params.json
+            {
+                "data_bucket": "${{ env.BUCKET_NAME }}",
+                "schema_bucket": "${{ env.BUCKET_NAME }}",
+                "changed_files": "${FILE_LIST}"
+            }
+            EOF
+            
 
       - name: Trigger Dataflow Job for Changed CSVs
         if: steps.changed.outputs.changed_files != ''
         run: |
-            echo "Triggering Dataflow for changed files: ${{ steps.changed.outputs.changed_files }}"
-        
-            # Store changed files as a quoted string
-            FILE_LIST="${{ steps.changed.outputs.changed_files }}"
-            
             gcloud dataflow flex-template run "run-ingestion-$(date +%s)" \
-                --project=${{ env.PROJECT_ID }} \
-                --region=${{ env.REGION }} \
-                --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
-                --parameters="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},changed_files='${FILE_LIST}'"
+            --project=${{ env.PROJECT_ID }} \
+            --region=${{ env.REGION }} \
+            --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
+            --parameters-file=./params.json
         
