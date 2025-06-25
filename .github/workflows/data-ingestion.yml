@@ -76,7 +76,7 @@ jobs:
             ENCODED_FILE_LIST="${FILE_LIST//,/%%2C}"
             echo "$ENCODED_FILE_LIST"
 
-            PARAMS="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},changed_files=${ENCODED_FILE_LIST}"
+            PARAMS="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},data_prefix=data/,project=${{ env.PROJECT_ID }},changed_files=${ENCODED_FILE_LIST}"
             
             echo "Final --parameters string: $PARAMS"
         
