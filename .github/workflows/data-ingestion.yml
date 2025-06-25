@@ -73,11 +73,10 @@ jobs:
         run: |
             echo "Triggering Dataflow for changed files: ${{ steps.changed.outputs.changed_files }}"
         
-            # Extract the changed files
             FILE_LIST="${{ steps.changed.outputs.changed_files }}"
         
-            # Properly escape for gcloud CLI: wrap value in double-quotes and escape inner quotes
-            PARAMS="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},changed_files=\\\"$FILE_LIST\\\""
+            # Wrap FILE_LIST in single quotes inside the parameters string (no backslashes)
+            PARAMS="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},changed_files='${FILE_LIST}'"
         
             echo "Final --parameters string: $PARAMS"
         
