@@ -62,7 +62,7 @@ def run(pipeline_args, data_bucket, schema_bucket, changed_files, project):
     p = beam.Pipeline(options=options)
 
     mapping = load_mapping(schema_bucket, 'config/mappings.yaml')
-
+    error_hospital_table = f'{project}.cso_exercise_bq_error_hospital.error_log'
     for file_path in changed_files:
         # Find mapping entry
         entry = next((m for m in mapping['mappings'] if m['csv_path'] == file_path), None)
@@ -72,21 +72,14 @@ def run(pipeline_args, data_bucket, schema_bucket, changed_files, project):
         dataset = entry['dataset']
         table = entry['table']
         bq_table = f"{project}.{dataset}.{table}"
-
-    # rest of your pipeline: read CSV, validate, write to bq_table
-
-
-    error_hospital_table = f'{project}.cso_exercise_bq_error_hospital.error_log'
-
-    for file_path in changed_files:
+    
         filename = file_path.split('/')[-1].replace('.csv', '')
         schema_path = f"schemas/{filename}_schema.json"
-        bq_table = f"{project}.{dataset}.{filename}"
 
         validated_and_errors = (
             p
             | f"Read_{filename}" >> ReadFromText(f"gs://{data_bucket}/{file_path}", skip_header_lines=1)
-            | f"Validate_{filename}" >> beam.ParDo(ValidateAndFormat(schema_bucket, schema_path, file_path)).with_outputs('errors', main='valid_rows')
+            | f"Validate_{filename}" >> beam.ParDo(ValidateAndFormat(schema_bucket, schema_path, file_path, entry['header'])).with_outputs('errors', main='valid_rows')
         )
 
         valid_rows = validated_and_errors.valid_rows
@@ -114,7 +107,7 @@ if __name__ == "__main__":
     parser.add_argument("--data_bucket", required=True)
     parser.add_argument("--schema_bucket", required=True)
     parser.add_argument("--changed_files", required=True,
-                    help="List of changed CSV file paths in the bucket, e.g. data/customers.csv,data/orders.csv")
+                    help="List of changed CSV file paths in the bucket, e.g. data/customers.csv;data/orders.csv")
     parser.add_argument("--project", required=True, help="GCP project ID")
 
     known_args, pipeline_args = parser.parse_known_args()

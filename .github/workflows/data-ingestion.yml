@@ -69,7 +69,7 @@ jobs:
             IFS=';' read -ra FILES <<< "$FILE_LIST_SC"
             for file in "${FILES[@]}"; do
               echo "Uploading data file: $file"
-              gsutil cp "$file" gs://${{ env.BUCKET_NAME }}/data/
+              gsutil cp "$file" gs://${{ env.BUCKET_NAME }}/$file
               
               # Extract filename without path and extension
               fname=$(basename "$file" .csv)
