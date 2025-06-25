@@ -21,13 +21,13 @@ def load_mapping(schema_bucket, mapping_path):
     return mapping
 
 class ValidateAndFormat(beam.DoFn):
-    def __init__(self, schema_bucket, schema_path, file_path, header):
+    def __init__(self, schema_bucket, schema_path, file_path):
         self.schema_bucket = schema_bucket
         self.schema_path = schema_path
         self.schema = None
         self.storage_client = None
         self.file_path = file_path
-        self.header = header.split(',')  # list of header names
+        self.header = None
 
     def setup(self):
         self.storage_client = storage.Client()
@@ -36,8 +36,10 @@ class ValidateAndFormat(beam.DoFn):
         self.schema = json.loads(schema_data)
 
     def process(self, element):
+        if self.header is None:
+            self.header = element.split(',')
+            return  # skip header row
 
-        # element is one CSV data row string, e.g. "123,abc,456"
         values = element.split(',')
         row = dict(zip(self.header, values))
 
@@ -82,7 +84,7 @@ def run(pipeline_args, data_bucket, schema_bucket, changed_files, project):
 
         validated_and_errors = (
             p
-            | f"Read_{filename}" >> ReadFromText(f"gs://{data_bucket}/{file_path}", skip_header_lines=1)
+            | f"Read_{filename}" >> ReadFromText(f"gs://{data_bucket}/{file_path}")
             | f"Validate_{filename}" >> beam.ParDo(ValidateAndFormat(schema_bucket, schema_path, file_path, entry['header'])).with_outputs('errors', main='valid_rows')
         )
 
