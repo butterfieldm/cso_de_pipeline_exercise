@@ -71,12 +71,13 @@ jobs:
         if: steps.changed.outputs.changed_files != ''
         run: |
             echo "Triggering Dataflow for changed files: ${{ steps.changed.outputs.changed_files }}"
-
-            # Escape commas in changed_files value
-            ESCAPED_FILES=$(echo "${{ steps.changed.outputs.changed_files }}" | sed 's/,/\\,/g')
-
+        
+            # Store changed files as a quoted string
+            FILE_LIST="${{ steps.changed.outputs.changed_files }}"
+            
             gcloud dataflow flex-template run "run-ingestion-$(date +%s)" \
                 --project=${{ env.PROJECT_ID }} \
                 --region=${{ env.REGION }} \
                 --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
-                --parameters=data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},changed_files=${ESCAPED_FILES}
+                --parameters="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},changed_files='${FILE_LIST}'"
+        
