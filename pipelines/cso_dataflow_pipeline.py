@@ -67,7 +67,9 @@ if __name__ == "__main__":
     parser.add_argument("--data_bucket", required=True)
     parser.add_argument("--schema_bucket", required=True)
     parser.add_argument("--changed_files", required=True,
-                        help="List of changed CSV file paths in the bucket, e.g. data/customers.csv data/orders.csv")
+                    help="List of changed CSV file paths in the bucket, e.g. data/customers.csv,data/orders.csv")
     known_args, pipeline_args = parser.parse_known_args()
-    changed_files = known_args.changed_files.split(",")
+
+    # Parse comma-separated list string into a list
+    changed_files = [f.strip() for f in known_args.changed_files.split(",") if f.strip()]
     run(pipeline_args, known_args.data_bucket, known_args.schema_bucket, changed_files)
