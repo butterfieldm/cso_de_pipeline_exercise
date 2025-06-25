@@ -58,6 +58,10 @@ class ValidateAndFormat(beam.DoFn):
 
 
 def run(pipeline_args, data_bucket, schema_bucket, changed_files, project):
+
+    if not any(arg.startswith('--project') for arg in pipeline_args):
+        pipeline_args.append(f'--project={project}')    
+    
     options = PipelineOptions(pipeline_args)
     p = beam.Pipeline(options=options)
 
