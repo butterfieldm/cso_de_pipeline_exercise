@@ -67,17 +67,17 @@ jobs:
           gsutil cp schemas/* gs://${{ env.BUCKET_NAME }}/schemas/
           gsutil cp data/* gs://${{ env.BUCKET_NAME }}/data/
         
-
       - name: Trigger Dataflow Job for Changed CSVs
         if: steps.changed.outputs.changed_files != ''
         run: |
-            echo "Triggering Dataflow for changed files: ${{ steps.changed.outputs.changed_files }}"
-        
             FILE_LIST="${{ steps.changed.outputs.changed_files }}"
-        
-            # Wrap FILE_LIST in single quotes inside the parameters string (no backslashes)
-            PARAMS="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},changed_files='${FILE_LIST}'"
-        
+            echo "$FILE_LIST"
+            # URL encode commas to %2C (this avoids breaking the gcloud CLI parsing)
+            ENCODED_FILE_LIST="${FILE_LIST//,/%%2C}"
+            echo "$ENCODED_FILE_LIST"
+
+            PARAMS="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},changed_files=${ENCODED_FILE_LIST}"
+            
             echo "Final --parameters string: $PARAMS"
         
             gcloud dataflow flex-template run "run-ingestion-$(date +%s)" \
