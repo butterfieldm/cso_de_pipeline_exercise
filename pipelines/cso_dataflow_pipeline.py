@@ -66,8 +66,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_bucket", required=True)
     parser.add_argument("--schema_bucket", required=True)
-    parser.add_argument("--changed_files", nargs="+", required=True,
+    parser.add_argument("--changed_files", required=True,
                         help="List of changed CSV file paths in the bucket, e.g. data/customers.csv data/orders.csv")
     known_args, pipeline_args = parser.parse_known_args()
-
-    run(pipeline_args, known_args.data_bucket, known_args.schema_bucket, known_args.changed_files)
+    changed_files = known_args.changed_files.split(",")
+    run(pipeline_args, known_args.data_bucket, known_args.schema_bucket, changed_files)
