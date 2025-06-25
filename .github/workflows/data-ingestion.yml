@@ -31,24 +31,37 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
-      - name: Upload Schema & CSV
+      - name: Get Changed CSV Files
+        id: changed
+        run: |
+          git fetch origin main
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep '^data/.*\.csv$' || true)
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No CSV changes found."
+            echo "changed_files=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Changed CSVs:"
+          echo "$CHANGED_FILES"
+
+          # Convert newline-separated to comma-separated (data/customers.csv,data/orders.csv)
+          CHANGED_CSVS=$(echo "$CHANGED_FILES" | paste -sd "," -)
+          echo "changed_files=$CHANGED_CSVS" >> $GITHUB_OUTPUT
+
+      - name: Upload Data and Schema to GCS
+        if: steps.changed.outputs.changed_files != ''
         run: |
           gsutil cp schemas/* gs://${{ env.BUCKET_NAME }}/schemas/
           gsutil cp data/* gs://${{ env.BUCKET_NAME }}/data/
 
-      - name: Trigger Dataflow Jobs for all CSV files
+      - name: Trigger Dataflow Job for Changed CSVs
+        if: steps.changed.outputs.changed_files != ''
         run: |
-          for csvfile in data/*.csv; do
-            base=$(basename "$csvfile" .csv)
-            schemafile="schemas/${base}_schema.json"
-            if [[ -f "$schemafile" ]]; then
-              echo "Launching Dataflow for $csvfile with schema $schemafile"
-              gcloud dataflow flex-template run "run-${base}-$(date +%s)" \
-                --project=${{ env.PROJECT_ID }} \
-                --region=${{ env.REGION }} \
-                --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
-                --parameters "data_bucket=${{ env.BUCKET_NAME }},target_file=data/${base}.csv,project=${{ env.PROJECT_ID }}"
-            else
-              echo "No matching schema for $csvfile, skipping."
-            fi
-          done
+          echo "Triggering Dataflow for changed files: ${{ steps.changed.outputs.changed_files }}"
+          gcloud dataflow flex-template run "run-ingestion-$(date +%s)" \
+            --project=${{ env.PROJECT_ID }} \
+            --region=${{ env.REGION }} \
+            --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
+            --parameters "data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},changed_files=${{ steps.changed.outputs.changed_files }}"
