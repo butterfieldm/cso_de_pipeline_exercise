@@ -1,6 +1,4 @@
 {
-  "name": "cso-dataflow-template",
-  "description": "Flexible Dataflow pipeline for CSV ingestion",
   "parameters": [
     {
       "name": "data_bucket",
@@ -18,6 +16,18 @@
       "name": "project",
       "label": "GCP Project ID",
       "helpText": "Project ID for the pipeline",
+      "paramType": "TEXT"
+    },
+    {
+      "name": "schema_bucket",
+      "label": "Schema Bucket",
+      "helpText": "GCS bucket containing the JSON schemas",
+      "paramType": "TEXT"
+    },
+    {
+      "name": "changed_files",
+      "label": "Changed Files",
+      "helpText": "Comma-separated list of changed CSV file paths",
       "paramType": "TEXT"
     }
   ]
