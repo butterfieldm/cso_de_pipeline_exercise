@@ -73,7 +73,7 @@ jobs:
             FILE_LIST="${{ steps.changed.outputs.changed_files }}"
             echo "$FILE_LIST"
            
-            ENCODED_FILE_LIST="${FILE_LIST//,/;}"
+            FILE_LIST_SC="${FILE_LIST//,/;}"
             echo "Changed delimeter: $FILE_LIST_SC"
 
             PARAMS="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},data_prefix=data/,project=${{ env.PROJECT_ID }},changed_files=${FILE_LIST_SC"}"
