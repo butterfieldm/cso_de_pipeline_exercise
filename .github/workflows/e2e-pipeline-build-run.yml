@@ -130,23 +130,24 @@ jobs:
       # --- Trigger Dataflow ingestion ---
       - name: Trigger Dataflow Job for Changed CSVs
         if: steps.changed.outputs.changed_files != ''
+        id: dataflow
         run: |
+          JOB_NAME="run-ingestion-$(date +%s)"
+          echo "Dataflow job name: $JOB_NAME"
+      
           FILE_LIST="${{ steps.changed.outputs.changed_files }}"
           FILE_LIST_SC="${FILE_LIST//,/;}"
-          echo "Changed delimiter: $FILE_LIST_SC"
-
           PARAMS="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},data_prefix=data/,project=${{ env.PROJECT_ID }},changed_files=${FILE_LIST_SC}"
-
-          echo "Final --parameters string: $PARAMS"
-
-          gcloud dataflow flex-template run "run-ingestion-$(date +%s)" \
+      
+          echo "Launching Dataflow job..."
+          gcloud dataflow flex-template run "$JOB_NAME" \
               --project=${{ env.PROJECT_ID }} \
               --region=${{ env.REGION }} \
               --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
               --parameters="$PARAMS"
-
-          echo "job_name=$JOB_NAME" >> "$GITHUB_OUTPUT"
-
+    
+          echo "job_name=$JOB_NAME" >> $GITHUB_OUTPUT
+      
       # --- Waiting for Dataflow Job to Complete ---
       - name: Wait for Dataflow Job to Complete
         if: steps.changed.outputs.changed_files != ''
