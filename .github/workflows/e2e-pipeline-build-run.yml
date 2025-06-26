@@ -145,13 +145,39 @@ jobs:
               --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
               --parameters="$PARAMS"
 
+          echo "job_name=$JOB_NAME" >> $GITHUB_OUTPUT
+
+      # --- Waiting for Dataflow Job to Complete ---
+      - name: Wait for Dataflow Job to Complete
+        if: steps.changed.outputs.changed_files != ''
+        run: |
+          JOB_NAME="${{ steps.dataflow.outputs.job_name }}"
+          echo "Waiting for Dataflow job $JOB_NAME to complete..."
+
+          while true; do
+            STATUS=$(gcloud dataflow jobs describe "$JOB_NAME" --region=${{ env.REGION }} --format="value(currentState)")
+            echo "Current status: $STATUS"
+
+            if [[ "$STATUS" == "JOB_STATE_DONE" ]]; then
+              echo "Dataflow job completed successfully."
+              break
+            elif [[ "$STATUS" == "JOB_STATE_FAILED" || "$STATUS" == "JOB_STATE_CANCELLED" ]]; then
+              echo "Dataflow job failed or was cancelled."
+              exit 1
+            else
+              echo "Still running... waiting 30 seconds."
+              sleep 30
+            fi
+          done
+
       # --- Run cleaning and testing SQL scripts for each changed CSV ---
       - name: Run Cleaning and Testing SQL Scripts
         if: steps.changed.outputs.changed_files != ''
         run: |
           IFS=',' read -ra FILES <<< "${{ steps.changed.outputs.changed_files }}"
           for csvfile in "${FILES[@]}"; do
-            base_name=$(basename "$csvfile" .csv)
+            filename=$(basename "$csvfile")            
+            base_name="${filename%.csv}"               
             sqlfile="sql/${base_name}.sql"
 
             if [[ -f "$sqlfile" ]]; then
