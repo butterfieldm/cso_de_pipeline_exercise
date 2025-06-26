@@ -85,7 +85,7 @@ jobs:
           else
             echo "No previous commit found. Using all CSVs and analysis SQLs."
             CHANGED_CSVS=$(find data -type f -name "*.csv" || true)
-            CHANGED_SQL=$(find analysis -type f -name "*.sql" || true)
+            CHANGED_SQL=$(find sql/analysis -type f -name "*.sql" || true)
           fi
       
           # Output changed CSVs
