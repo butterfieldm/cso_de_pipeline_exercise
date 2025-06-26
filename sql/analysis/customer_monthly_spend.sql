@@ -3,7 +3,7 @@ PARTITION BY month_date
 CLUSTER BY customer_id AS
 SELECT
   a.customer_id,
-  CONCAT(b.first_name, ' ', b.last_name) AS full_name
+  CONCAT(b.first_name, ' ', b.last_name) AS full_name,
   DATE_TRUNC(transaction_dttm, MONTH) AS month_date, 
   SUM(amount) AS total_monthly_spend,
   AVG(amount) AS avg_transaction_amount
