@@ -1,5 +1,5 @@
 CREATE OR REPLACE MATERIALIZED VIEW `cso-deng-pipeline.cso_exercise_bq_analysis.customer_monthly_spend`
-PARTITION BY month_date
+PARTITION BY DATE_TRUNC(transaction_dttm, MONTH) 
 CLUSTER BY customer_id AS
 SELECT
   a.customer_id,
