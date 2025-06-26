@@ -208,6 +208,14 @@ Costs for Pipeline (with small usage): Negligable
 
 This project is built with several assumptions to simplify design and deployment. Understanding these will help determine whether the pipeline suits a project's needs or whether further modifications are required.
 
+### Project Handling
+
+- **Running the project**
+  This project was ran by a single engineer, testing was limited to that one person. In a real environment thorough peer reviews and testing would be required
+- **Pull Requests**
+  Pull requests are automatically merged to main, in a proper environment, main should be protected and a secondary feature branch should be used to push changes to for running the pipeline
+
+
 ### File Format and Naming
 
 - **CSV files only**  
