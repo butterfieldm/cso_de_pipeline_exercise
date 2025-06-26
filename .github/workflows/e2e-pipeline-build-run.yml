@@ -207,7 +207,7 @@ jobs:
           for csvfile in "${FILES[@]}"; do
             filename=$(basename "$csvfile")            
             base_name="${filename%.csv}"               
-            sqlfile="sql/${base_name}.sql"
+            sqlfile="sql/clean_and_test/${base_name}.sql"
 
             if [[ -f "$sqlfile" ]]; then
               echo "Running cleaning and testing SQL for $base_name using $sqlfile"
