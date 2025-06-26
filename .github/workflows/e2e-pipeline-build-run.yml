@@ -234,7 +234,7 @@ jobs:
       - name: Run Analysis SQL Scripts
         if: steps.changed.outputs.changed_csvs != '' || steps.changed.outputs.changed_analysis_sql != ''
         run: |
-          for sqlfile in analysis/*.sql; do
+          for sqlfile in sql/analysis/*.sql; do
             echo "Running analysis SQL script $sqlfile"
             bq query --use_legacy_sql=false --format=prettyjson < "$sqlfile"
           done
