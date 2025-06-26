@@ -1,18 +1,37 @@
 {
-  "name": "CSO Flex Template",
-  "description": "Pipeline to load CSVs to BigQuery",
+  "name": "cso-dataflow-template",
+  "description": "Flexible Dataflow pipeline for CSV ingestion",
   "parameters": [
     {
-      "name": "inputFile",
-      "label": "Input CSV File",
-      "helpText": "GCS path to input CSV",
-      "isOptional": false
+      "name": "data_bucket",
+      "label": "Data Bucket",
+      "helpText": "GCS bucket containing the data files",
+      "paramType": "TEXT"
     },
     {
-      "name": "schemaFile",
-      "label": "Input Schema File",
-      "helpText": "GCS path to schema file",
-      "isOptional": false
+      "name": "data_prefix",
+      "label": "Data Prefix",
+      "helpText": "Prefix path for CSV files, e.g. 'data/'",
+      "paramType": "TEXT"
+    },
+    {
+      "name": "project",
+      "label": "GCP Project ID",
+      "helpText": "Project ID for the pipeline",
+      "paramType": "TEXT"
+    },
+    {
+      "name": "schema_bucket",
+      "label": "Schema Bucket",
+      "helpText": "GCS bucket containing the JSON schemas",
+      "paramType": "TEXT"
+    },
+    {
+      "name": "changed_files",
+      "label": "Changed Files",
+      "helpText": "Comma-separated list of changed CSV file paths",
+      "paramType": "TEXT"
     }
   ]
 }
+  

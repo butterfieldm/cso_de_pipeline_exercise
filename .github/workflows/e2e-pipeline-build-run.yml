@@ -1,0 +1,163 @@
+name: Full Pipeline Deploy, Ingest & Test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'gcp-terraform/**'
+      - 'functions/**'
+      - 'data/**'
+      - 'schemas/**'
+      - 'sql/**'
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_ID: cso-deng-pipeline
+      REGION: us-central1
+      BUCKET_NAME: cso-exercise-ingestion-raw
+      DATAFLOW_TEMPLATE_PATH: gs://cso-exercise-ingestion-raw/templates/cso-dataflow-template.json
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_PROJECT_KEY }}
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      # --- Infrastructure deploy steps ---
+      - name: Package Cloud Function
+        run: |
+          cd functions
+          zip -r ../gcp-terraform/function-source.zip .
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init & Apply
+        working-directory: ./gcp-terraform
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Build & Push Flex Template Image
+        run: |
+          IMAGE_URI=us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/gcf-artifacts/dataflow-flex-template:latest
+          gcloud config set project ${{ env.PROJECT_ID }}
+          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+          docker build --no-cache -t $IMAGE_URI .
+          docker push $IMAGE_URI
+
+      - name: Create Flex Template JSON
+        run: |
+          gcloud dataflow flex-template build ${{ env.DATAFLOW_TEMPLATE_PATH }} \
+            --image us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/gcf-artifacts/dataflow-flex-template:latest \
+            --sdk-language "PYTHON" \
+            --metadata-file metadata.json
+
+      - name: Upload Function Code
+        run: |
+          gsutil cp gcp-terraform/function-source.zip gs://${{ env.BUCKET_NAME }}/function-source.zip
+
+      # --- Detect changed CSV files ---
+      - name: Get Changed CSV Files
+        id: changed
+        run: |
+          git fetch --depth=2 origin main || true
+          
+          if git rev-parse HEAD^ 2>/dev/null; then
+            echo "Found previous commit, checking diff..."
+            CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep '^data/.*\.csv$' || true)
+          else
+            echo "No previous commit found (manual run or shallow clone). Using all CSVs in data/."
+            CHANGED_FILES=$(find data -type f -name "*.csv")
+          fi
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No CSV changes found."
+            echo "changed_files=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Changed CSVs:"
+          echo "$CHANGED_FILES"
+
+          # Convert to comma-separated list
+          CHANGED_CSVS=$(echo "$CHANGED_FILES" | paste -sd "," -)
+          echo "changed_files=$CHANGED_CSVS" >> $GITHUB_OUTPUT
+
+      - name: List Changed CSV Files
+        run: |
+          echo "Changed CSV files: ${{ steps.changed.outputs.changed_files }}"
+
+      # --- Upload changed CSV and schema files ---
+      - name: Upload Changed CSV and Schema Files to GCS
+        if: steps.changed.outputs.changed_files != ''
+        run: |
+          FILE_LIST="${{ steps.changed.outputs.changed_files }}"
+          FILE_LIST_SC="${FILE_LIST//,/;}"
+          IFS=';' read -ra FILES <<< "$FILE_LIST_SC"
+          for file in "${FILES[@]}"; do
+            echo "Uploading data file: $file"
+            gsutil cp "$file" gs://${{ env.BUCKET_NAME }}/$file
+
+            fname=$(basename "$file" .csv)
+
+            schema_file="schemas/${fname}_schema.json"
+            if [ -f "$schema_file" ]; then
+              echo "Uploading schema file: $schema_file"
+              gsutil cp "$schema_file" gs://${{ env.BUCKET_NAME }}/schemas/
+            else
+              echo "Schema file $schema_file not found, skipping."
+            fi
+          done
+
+      - name: Upload Mapping Config to GCS
+        run: |
+          gsutil cp mappings.yaml gs://${{ env.BUCKET_NAME }}/config/mappings.yaml
+
+      # --- Trigger Dataflow ingestion ---
+      - name: Trigger Dataflow Job for Changed CSVs
+        if: steps.changed.outputs.changed_files != ''
+        run: |
+          FILE_LIST="${{ steps.changed.outputs.changed_files }}"
+          FILE_LIST_SC="${FILE_LIST//,/;}"
+          echo "Changed delimiter: $FILE_LIST_SC"
+
+          PARAMS="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},data_prefix=data/,project=${{ env.PROJECT_ID }},changed_files=${FILE_LIST_SC}"
+
+          echo "Final --parameters string: $PARAMS"
+
+          gcloud dataflow flex-template run "run-ingestion-$(date +%s)" \
+              --project=${{ env.PROJECT_ID }} \
+              --region=${{ env.REGION }} \
+              --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
+              --parameters="$PARAMS"
+
+      # --- Run cleaning and testing SQL scripts for each changed CSV ---
+      - name: Run Cleaning and Testing SQL Scripts
+        if: steps.changed.outputs.changed_files != ''
+        run: |
+          IFS=',' read -ra FILES <<< "${{ steps.changed.outputs.changed_files }}"
+          for csvfile in "${FILES[@]}"; do
+            base_name=$(basename "$csvfile" .csv)
+            sqlfile="sql/${base_name}.sql"
+
+            if [[ -f "$sqlfile" ]]; then
+              echo "Running cleaning and testing SQL for $base_name using $sqlfile"
+              bq query --use_legacy_sql=false --format=prettyjson < "$sqlfile"
+            else
+              echo "No SQL script found for $base_name, skipping."
+            fi
+          done

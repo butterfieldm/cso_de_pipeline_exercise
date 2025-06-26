@@ -4,3 +4,6 @@ transactions_test.csv
 #Python venv
 lloy_venv
 test_workflows/
+test.sh
+test_parse_validate.py
+cso_dataflow_pipeline_archive.py

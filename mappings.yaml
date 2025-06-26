@@ -1,0 +1,7 @@
+mappings:
+  - csv_path: "data/customers.csv"
+    dataset: "cso_exercise_bq_staging"
+    table: "customers"
+  - csv_path: "data/transactions.csv"
+    dataset: "cso_exercise_bq_staging"
+    table: "transactions"

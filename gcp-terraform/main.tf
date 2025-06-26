@@ -91,15 +91,6 @@ resource "google_storage_notification" "notify_uploads" {
   ]
 }
 
-resource "google_pubsub_topic" "gcs_upload_topic" {
-  name = "gcs-file-drop-topic"
-}
-
-resource "google_pubsub_subscription" "gcs_upload_sub" {
-  name  = "gcs-upload-sub"
-  topic = google_pubsub_topic.gcs_upload_topic.name
-}
-
 resource "google_project_service" "pubsub" {
   project = var.project_id
   service = "pubsub.googleapis.com"
@@ -164,5 +155,13 @@ resource "google_cloudfunctions2_function" "gcs_trigger" {
     pubsub_topic = google_pubsub_topic.gcs_notifications.id
     retry_policy = "RETRY_POLICY_DO_NOT_RETRY"
   }
+}
+
+resource "google_artifact_registry_repository" "dataflow_flex_templates" {
+  provider = google
+  location = var.region
+  repository_id = "gcf-artifacts"
+  description  = "Artifact Registry for Flex Template Docker Images"
+  format       = "DOCKER"
 }
 
