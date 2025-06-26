@@ -47,6 +47,23 @@ class ValidateAndFormat(beam.DoFn):
             "required": [f["name"] for f in bq_schema_fields if f["mode"] == "REQUIRED"]
         }
 
+    def cast_value(self, value, target_type):
+        try:
+            if value == "":
+                return None
+            if target_type == "number":
+                return float(value)
+            elif target_type == "integer":
+                return int(value)
+            elif target_type == "boolean":
+                return value.lower() == "true"
+            elif target_type == "string":
+                return value
+            else:
+                return value
+        except Exception:
+            return value  # Let schema validation catch any mismatch
+
     def setup(self):
         self.storage_client = storage.Client()
         schema_blob = self.storage_client.bucket(self.schema_bucket).blob(self.schema_path)
@@ -56,14 +73,20 @@ class ValidateAndFormat(beam.DoFn):
     def process(self, element):
         if self.header is None:
             self.header = element.split(',')
-            return
+            return  # skip header
 
         values = element.split(',')
-        row = dict(zip(self.header, values))
+        raw_row = dict(zip(self.header, values))
+
+        # Type-cast values
+        typed_row = {}
+        for key, value in raw_row.items():
+            expected_type = self.schema["properties"].get(key, {}).get("type", "string")
+            typed_row[key] = self.cast_value(value, expected_type)
 
         try:
-            jsonschema.validate(instance=row, schema=self.schema)
-            yield row
+            jsonschema.validate(instance=typed_row, schema=self.schema)
+            yield typed_row
         except jsonschema.ValidationError as e:
             yield beam.pvalue.TaggedOutput(
                 'errors',
@@ -71,10 +94,11 @@ class ValidateAndFormat(beam.DoFn):
                     'table': self.schema_path.split('/')[-1].replace('_schema.json', ''),
                     'error': str(e),
                     'file_path': self.file_path,
-                    'raw_row': str(row),
+                    'raw_row': str(raw_row),
                     'ingestion_ts': datetime.datetime.utcnow().isoformat()
                 }
             )
+
 
 
 def run(pipeline_args, data_bucket, schema_bucket, changed_files, project):
