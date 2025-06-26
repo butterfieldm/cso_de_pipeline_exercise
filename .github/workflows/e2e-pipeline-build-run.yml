@@ -152,51 +152,51 @@ jobs:
       - name: Wait for Dataflow Job to Complete
         if: steps.changed.outputs.changed_files != ''
         run: |
-          echo "Retrieved job name: ${{ steps.dataflow.outputs.job_name }}"
           JOB_NAME="${{ steps.dataflow.outputs.job_name }}"
           REGION=${{ env.REGION }}
       
-          if [[ -z "$JOB_NAME" ]]; then
-            echo "JOB_NAME is empty. Exiting."
+          echo "Waiting for Dataflow job named $JOB_NAME to appear..."
+      
+          MAX_WAIT_SECONDS=480  # 8 minutes total wait time
+          SLEEP_INTERVAL=20
+          ELAPSED=0
+          JOB_ID=""
+      
+          while [ -z "$JOB_ID" ] && [ $ELAPSED -lt $MAX_WAIT_SECONDS ]; do
+            JOB_ID=$(gcloud dataflow jobs list --region=$REGION --filter="name=$JOB_NAME" --format="value(id)" 2>/dev/null || true)
+            if [ -z "$JOB_ID" ]; then
+              echo "Job not found yet, waiting $SLEEP_INTERVAL seconds..."
+              sleep $SLEEP_INTERVAL
+              ELAPSED=$((ELAPSED + SLEEP_INTERVAL))
+            fi
+          done
+      
+          if [ -z "$JOB_ID" ]; then
+            echo "Timed out waiting for Dataflow job to appear after $MAX_WAIT_SECONDS seconds."
             exit 1
           fi
       
-          echo "Looking up job $JOB_NAME in Dataflow..."
-      
-          MAX_RETRIES=24
-          COUNT=0
-      
-          # Wait until job is registered
-          until JOB_ID=$(gcloud dataflow jobs list --region=$REGION --filter="name:$JOB_NAME" --format="value(id)" 2>/dev/null); do
-            echo "Job not found yet. Waiting 10 seconds..."
-            sleep 20
-            COUNT=$((COUNT + 1))
-            if [[ "$COUNT" -ge "$MAX_RETRIES" ]]; then
-              echo "Timed out waiting for job to appear in Dataflow job list."
-              exit 1
-            fi
-          done
-      
           echo "Found job ID: $JOB_ID"
-      
           echo "Waiting for job $JOB_ID to complete..."
       
           while true; do
-            STATUS=$(gcloud dataflow jobs describe "$JOB_ID" --region="$REGION" --format="value(currentState)")
+            STATUS=$(gcloud dataflow jobs describe "$JOB_ID" --region="$REGION" --format="value(currentState)" 2>/dev/null || echo "NOT_FOUND")
             echo "Current status: $STATUS"
       
-            if [[ "$STATUS" == "JOB_STATE_DONE" ]]; then
+            if [ "$STATUS" == "JOB_STATE_DONE" ]; then
               echo "Dataflow job completed successfully."
               break
-            elif [[ "$STATUS" == "JOB_STATE_FAILED" || "$STATUS" == "JOB_STATE_CANCELLED" ]]; then
+            elif [ "$STATUS" == "JOB_STATE_FAILED" ] || [ "$STATUS" == "JOB_STATE_CANCELLED" ]; then
               echo "Dataflow job failed or was cancelled."
               exit 1
+            elif [ "$STATUS" == "NOT_FOUND" ]; then
+              echo "Job temporarily not found, waiting $SLEEP_INTERVAL seconds..."
+              sleep $SLEEP_INTERVAL
             else
-              echo "⏳ Still running... waiting 30 seconds."
-              sleep 30
+              echo "Job running, waiting $SLEEP_INTERVAL seconds..."
+              sleep $SLEEP_INTERVAL
             fi
           done
-      
       
 
       # --- Run cleaning and testing SQL scripts for each changed CSV ---
