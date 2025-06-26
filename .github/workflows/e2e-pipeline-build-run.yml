@@ -154,16 +154,35 @@ jobs:
         run: |
           echo "Retrieved job name: ${{ steps.dataflow.outputs.job_name }}"
           JOB_NAME="${{ steps.dataflow.outputs.job_name }}"
+          REGION=${{ env.REGION }}
       
           if [[ -z "$JOB_NAME" ]]; then
             echo "JOB_NAME is empty. Exiting."
             exit 1
           fi
       
-          echo "Waiting for Dataflow job $JOB_NAME to complete..."
+          echo "Looking up job $JOB_NAME in Dataflow..."
+      
+          MAX_RETRIES=24
+          COUNT=0
+      
+          # Wait until job is registered
+          until JOB_ID=$(gcloud dataflow jobs list --region=$REGION --filter="name:$JOB_NAME" --format="value(id)" 2>/dev/null); do
+            echo "Job not found yet. Waiting 10 seconds..."
+            sleep 20
+            COUNT=$((COUNT + 1))
+            if [[ "$COUNT" -ge "$MAX_RETRIES" ]]; then
+              echo "Timed out waiting for job to appear in Dataflow job list."
+              exit 1
+            fi
+          done
+      
+          echo "Found job ID: $JOB_ID"
+      
+          echo "Waiting for job $JOB_ID to complete..."
       
           while true; do
-            STATUS=$(gcloud dataflow jobs describe "$JOB_NAME" --region=${{ env.REGION }} --format="value(currentState)")
+            STATUS=$(gcloud dataflow jobs describe "$JOB_ID" --region="$REGION" --format="value(currentState)")
             echo "Current status: $STATUS"
       
             if [[ "$STATUS" == "JOB_STATE_DONE" ]]; then
@@ -173,10 +192,11 @@ jobs:
               echo "Dataflow job failed or was cancelled."
               exit 1
             else
-              echo "Still running... waiting 30 seconds."
+              echo "⏳ Still running... waiting 30 seconds."
               sleep 30
             fi
           done
+      
       
 
       # --- Run cleaning and testing SQL scripts for each changed CSV ---
