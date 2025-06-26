@@ -157,7 +157,7 @@ jobs:
       
           echo "Waiting for Dataflow job named $JOB_NAME to appear..."
       
-          MAX_WAIT_SECONDS=480  # 8 minutes total wait time
+          MAX_WAIT_SECONDS=600  # 10 minutes total wait time
           SLEEP_INTERVAL=20
           ELAPSED=0
           JOB_ID=""

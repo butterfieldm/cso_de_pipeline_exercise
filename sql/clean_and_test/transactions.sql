@@ -60,4 +60,5 @@ SELECT
   UPPER(TRIM(merchant_name)) AS merchant_name,
   UPPER(TRIM(category)) AS category,
   balance_after
-FROM `cso-deng-pipeline.cso_exercise_bq_staging.transactions`;
+FROM `cso-deng-pipeline.cso_exercise_bq_staging.transactions`
+ORDER BY transaction_id, customer_id, transaction_dttm;

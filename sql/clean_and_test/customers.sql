@@ -66,9 +66,11 @@ SELECT
   TRIM(last_name) AS last_name,
   TRIM(email) AS email,
   date_of_birth,
-  TRIM(REPLACE(phone, '+', '')) AS phone,
+  REGEXP_REPLACE(TRIM(REPLACE(phone, '+', '')), r'\s+', '') AS phone,
   city,
-  postcode,
+  REGEXP_REPLACE(TRIM(postcode), r'\s+', '') AS postcode,
   valid_from_dttm,
   valid_to_dttm
-FROM `cso-deng-pipeline.cso_exercise_bq_staging.customers`;
+FROM `cso-deng-pipeline.cso_exercise_bq_staging.customers`
+ORDER BY customer_id;
+
