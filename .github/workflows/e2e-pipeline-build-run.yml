@@ -151,13 +151,20 @@ jobs:
       - name: Wait for Dataflow Job to Complete
         if: steps.changed.outputs.changed_files != ''
         run: |
+          echo "Retrieved job name: ${{ steps.dataflow.outputs.job_name }}"
           JOB_NAME="${{ steps.dataflow.outputs.job_name }}"
+      
+          if [[ -z "$JOB_NAME" ]]; then
+            echo "JOB_NAME is empty. Exiting."
+            exit 1
+          fi
+      
           echo "Waiting for Dataflow job $JOB_NAME to complete..."
-
+      
           while true; do
             STATUS=$(gcloud dataflow jobs describe "$JOB_NAME" --region=${{ env.REGION }} --format="value(currentState)")
             echo "Current status: $STATUS"
-
+      
             if [[ "$STATUS" == "JOB_STATE_DONE" ]]; then
               echo "Dataflow job completed successfully."
               break
@@ -169,6 +176,7 @@ jobs:
               sleep 30
             fi
           done
+      
 
       # --- Run cleaning and testing SQL scripts for each changed CSV ---
       - name: Run Cleaning and Testing SQL Scripts
