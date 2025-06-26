@@ -70,32 +70,41 @@ jobs:
         run: |
           gsutil cp gcp-terraform/function-source.zip gs://${{ env.BUCKET_NAME }}/function-source.zip
 
-      # --- Detect changed CSV files ---
-      - name: Get Changed CSV Files
+      # --- Detect changed files ---
+      - name: Get Changed CSV and Analysis SQL Files
         id: changed
         run: |
           git fetch --depth=2 origin main || true
-          
-          if git rev-parse HEAD^ 2>/dev/null; then
-            echo "Found previous commit, checking diff..."
+
+          if git rev-parse HEAD^ >/dev/null 2>&1; then
+            echo "Checking diff against previous commit..."
             CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep '^data/.*\.csv$' || true)
+            CHANGED_SQL=$(git diff --name-only HEAD^ HEAD | grep '^sql/analysis/.*\.sql$' || true)
           else
-            echo "No previous commit found (manual run or shallow clone). Using all CSVs in data/."
-            CHANGED_FILES=$(find data -type f -name "*.csv")
+            echo "No previous commit found. Using all CSVs and analysis SQLs."
+            CHANGED_FILES=$(find data -type f -name "*.csv" || true)
+            CHANGED_SQL=$(find sql/analysis -type f -name "*.sql" || true)
           fi
 
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "No CSV changes found."
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "Changed CSVs:"
+            echo "$CHANGED_FILES"
+            CSV_LIST=$(echo "$CHANGED_FILES" | paste -sd "," -)
+            echo "changed_files=$CSV_LIST" >> $GITHUB_OUTPUT
+          else
+            echo "No changed CSVs found."
             echo "changed_files=" >> $GITHUB_OUTPUT
-            exit 0
           fi
 
-          echo "Changed CSVs:"
-          echo "$CHANGED_FILES"
-
-          # Convert to comma-separated list
-          CHANGED_CSVS=$(echo "$CHANGED_FILES" | paste -sd "," -)
-          echo "changed_files=$CHANGED_CSVS" >> $GITHUB_OUTPUT
+          if [ -n "$CHANGED_SQL" ]; then
+            echo "Changed analysis SQLs:"
+            echo "$CHANGED_SQL"
+            SQL_LIST=$(echo "$CHANGED_SQL" | paste -sd "," -)
+            echo "changed_analysis_sql=$SQL_LIST" >> $GITHUB_OUTPUT
+          else
+            echo "No changed analysis SQLs found."
+            echo "changed_analysis_sql=" >> $GITHUB_OUTPUT
+          fi
 
       - name: List Changed CSV Files
         run: |
@@ -113,7 +122,6 @@ jobs:
             gsutil cp "$file" gs://${{ env.BUCKET_NAME }}/$file
 
             fname=$(basename "$file" .csv)
-
             schema_file="schemas/${fname}_schema.json"
             if [ -f "$schema_file" ]; then
               echo "Uploading schema file: $schema_file"
@@ -130,29 +138,83 @@ jobs:
       # --- Trigger Dataflow ingestion ---
       - name: Trigger Dataflow Job for Changed CSVs
         if: steps.changed.outputs.changed_files != ''
+        id: dataflow
         run: |
+          JOB_NAME="run-ingestion-$(date +%s)"
+          echo "Dataflow job name: $JOB_NAME"
+
           FILE_LIST="${{ steps.changed.outputs.changed_files }}"
           FILE_LIST_SC="${FILE_LIST//,/;}"
-          echo "Changed delimiter: $FILE_LIST_SC"
-
           PARAMS="data_bucket=${{ env.BUCKET_NAME }},schema_bucket=${{ env.BUCKET_NAME }},data_prefix=data/,project=${{ env.PROJECT_ID }},changed_files=${FILE_LIST_SC}"
 
-          echo "Final --parameters string: $PARAMS"
-
-          gcloud dataflow flex-template run "run-ingestion-$(date +%s)" \
+          echo "Launching Dataflow job..."
+          gcloud dataflow flex-template run "$JOB_NAME" \
               --project=${{ env.PROJECT_ID }} \
               --region=${{ env.REGION }} \
               --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
               --parameters="$PARAMS"
 
-      # --- Run cleaning and testing SQL scripts for each changed CSV ---
+          echo "job_name=$JOB_NAME" >> $GITHUB_OUTPUT
+
+      # --- Wait for Dataflow Job to Complete ---
+      - name: Wait for Dataflow Job to Complete
+        if: steps.changed.outputs.changed_files != ''
+        run: |
+          JOB_NAME="${{ steps.dataflow.outputs.job_name }}"
+          REGION=${{ env.REGION }}
+
+          echo "Waiting for Dataflow job named $JOB_NAME to appear..."
+
+          MAX_WAIT_SECONDS=600
+          SLEEP_INTERVAL=20
+          ELAPSED=0
+          JOB_ID=""
+
+          while [ -z "$JOB_ID" ] && [ $ELAPSED -lt $MAX_WAIT_SECONDS ]; do
+            JOB_ID=$(gcloud dataflow jobs list --region=$REGION --filter="name=$JOB_NAME" --format="value(id)" 2>/dev/null || true)
+            if [ -z "$JOB_ID" ]; then
+              echo "Job not found yet, waiting $SLEEP_INTERVAL seconds..."
+              sleep $SLEEP_INTERVAL
+              ELAPSED=$((ELAPSED + SLEEP_INTERVAL))
+            fi
+          done
+
+          if [ -z "$JOB_ID" ]; then
+            echo "Timed out waiting for Dataflow job to appear after $MAX_WAIT_SECONDS seconds."
+            exit 1
+          fi
+
+          echo "Found job ID: $JOB_ID"
+          echo "Waiting for job $JOB_ID to complete..."
+
+          while true; do
+            STATUS=$(gcloud dataflow jobs describe "$JOB_ID" --region="$REGION" --format="value(currentState)" 2>/dev/null || echo "NOT_FOUND")
+            echo "Current status: $STATUS"
+
+            if [ "$STATUS" == "JOB_STATE_DONE" ]; then
+              echo "Dataflow job completed successfully."
+              break
+            elif [ "$STATUS" == "JOB_STATE_FAILED" ] || [ "$STATUS" == "JOB_STATE_CANCELLED" ]; then
+              echo "Dataflow job failed or was cancelled."
+              exit 1
+            elif [ "$STATUS" == "NOT_FOUND" ]; then
+              echo "Job temporarily not found, waiting $SLEEP_INTERVAL seconds..."
+              sleep $SLEEP_INTERVAL
+            else
+              echo "Job running, waiting $SLEEP_INTERVAL seconds..."
+              sleep $SLEEP_INTERVAL
+            fi
+          done
+
+      # --- Run cleaning and testing SQL scripts ---
       - name: Run Cleaning and Testing SQL Scripts
         if: steps.changed.outputs.changed_files != ''
         run: |
           IFS=',' read -ra FILES <<< "${{ steps.changed.outputs.changed_files }}"
           for csvfile in "${FILES[@]}"; do
-            base_name=$(basename "$csvfile" .csv)
-            sqlfile="sql/${base_name}.sql"
+            filename=$(basename "$csvfile")
+            base_name="${filename%.csv}"
+            sqlfile="sql/clean_and_test/${base_name}.sql"
 
             if [[ -f "$sqlfile" ]]; then
               echo "Running cleaning and testing SQL for $base_name using $sqlfile"
@@ -160,4 +222,13 @@ jobs:
             else
               echo "No SQL script found for $base_name, skipping."
             fi
+          done
+
+      # --- Run all analysis SQL scripts if any changed ---
+      - name: Run Analysis SQL Scripts
+        if: steps.changed.outputs.changed_files != '' || steps.changed.outputs.changed_analysis_sql != ''
+        run: |
+          for sqlfile in sql/analysis/*.sql; do
+            echo "Running analysis SQL script $sqlfile"
+            bq query --use_legacy_sql=false --format=prettyjson < "$sqlfile"
           done

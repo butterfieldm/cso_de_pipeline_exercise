@@ -29,6 +29,12 @@ resource "google_bigquery_dataset" "cso_exercise_bq_error_hospital" {
   delete_contents_on_destroy = true
 }
 
+resource "google_bigquery_dataset" "cso_exercise_bq_analysis" {
+  dataset_id                  = "cso_exercise_bq_analysis"
+  location                    = var.region
+  delete_contents_on_destroy = true
+}
+
 ## BigQuery Tables
 
 # Staging 
@@ -58,19 +64,6 @@ resource "google_bigquery_table" "curated_customers" {
   dataset_id         = google_bigquery_dataset.cso_exercise_bq_curated.dataset_id
   table_id           = "customers"
   schema             = file("${path.module}/../schemas/customers_schema.json")
-  deletion_protection = false
-}
-
-# Error Hospital
-resource "google_bigquery_table" "error_hospital_customers" {
-  dataset_id         = google_bigquery_dataset.cso_exercise_bq_error_hospital.dataset_id
-  table_id           = "customers"
-  deletion_protection = false
-}
-
-resource "google_bigquery_table" "error_hospital_transactions" {
-  dataset_id         = google_bigquery_dataset.cso_exercise_bq_error_hospital.dataset_id
-  table_id           = "transactions"
   deletion_protection = false
 }
 
