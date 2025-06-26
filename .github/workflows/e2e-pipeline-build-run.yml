@@ -70,32 +70,46 @@ jobs:
         run: |
           gsutil cp gcp-terraform/function-source.zip gs://${{ env.BUCKET_NAME }}/function-source.zip
 
-      # --- Detect changed CSV files ---
-      - name: Get Changed CSV Files
+      # --- Detect changed files ---
+      - name: Get Changed CSV and Analysis SQL Files
         id: changed
         run: |
+          # Try to fetch previous commit to compare against
           git fetch --depth=2 origin main || true
-          
-          if git rev-parse HEAD^ 2>/dev/null; then
-            echo "Found previous commit, checking diff..."
-            CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep '^data/.*\.csv$' || true)
+      
+          # Check if there's a previous commit
+          if git rev-parse HEAD^ >/dev/null 2>&1; then
+            echo "Checking diff against previous commit..."
+            CHANGED_CSVS=$(git diff --name-only HEAD^ HEAD | grep '^data/.*\.csv$' || true)
+            CHANGED_SQL=$(git diff --name-only HEAD^ HEAD | grep '^analysis/.*\.sql$' || true)
           else
-            echo "No previous commit found (manual run or shallow clone). Using all CSVs in data/."
-            CHANGED_FILES=$(find data -type f -name "*.csv")
+            echo "No previous commit found. Using all CSVs and analysis SQLs."
+            CHANGED_CSVS=$(find data -type f -name "*.csv" || true)
+            CHANGED_SQL=$(find analysis -type f -name "*.sql" || true)
           fi
-
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "No CSV changes found."
-            echo "changed_files=" >> $GITHUB_OUTPUT
-            exit 0
+      
+          # Output changed CSVs
+          if [ -n "$CHANGED_CSVS" ]; then
+            echo "Changed CSVs:"
+            echo "$CHANGED_CSVS"
+            CSV_LIST=$(echo "$CHANGED_CSVS" | paste -sd "," -)
+            echo "changed_csvs=$CSV_LIST" >> $GITHUB_OUTPUT
+          else
+            echo "No changed CSVs found."
+            echo "changed_csvs=" >> $GITHUB_OUTPUT
           fi
-
-          echo "Changed CSVs:"
-          echo "$CHANGED_FILES"
-
-          # Convert to comma-separated list
-          CHANGED_CSVS=$(echo "$CHANGED_FILES" | paste -sd "," -)
-          echo "changed_files=$CHANGED_CSVS" >> $GITHUB_OUTPUT
+      
+          # Output changed analysis SQLs
+          if [ -n "$CHANGED_SQL" ]; then
+            echo "Changed analysis SQLs:"
+            echo "$CHANGED_SQL"
+            SQL_LIST=$(echo "$CHANGED_SQL" | paste -sd "," -)
+            echo "changed_analysis_sql=$SQL_LIST" >> $GITHUB_OUTPUT
+          else
+            echo "No changed analysis SQLs found."
+            echo "changed_analysis_sql=" >> $GITHUB_OUTPUT
+          fi
+      
 
       - name: List Changed CSV Files
         run: |
@@ -215,4 +229,12 @@ jobs:
             else
               echo "No SQL script found for $base_name, skipping."
             fi
+          done
+      
+      - name: Run Analysis SQL Scripts
+        if: steps.changed.outputs.changed_csvs != '' || steps.changed.outputs.changed_analysis_sql != ''
+        run: |
+          for sqlfile in analysis/*.sql; do
+            echo "Running analysis SQL script $sqlfile"
+            bq query --use_legacy_sql=false --format=prettyjson < "$sqlfile"
           done
