@@ -145,7 +145,7 @@ jobs:
               --template-file-gcs-location=${{ env.DATAFLOW_TEMPLATE_PATH }} \
               --parameters="$PARAMS"
 
-          echo "job_name=$JOB_NAME" >> $GITHUB_OUTPUT
+          echo "job_name=$JOB_NAME" >> "$GITHUB_OUTPUT"
 
       # --- Waiting for Dataflow Job to Complete ---
       - name: Wait for Dataflow Job to Complete
