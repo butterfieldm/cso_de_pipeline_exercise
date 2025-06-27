@@ -21,7 +21,7 @@ This project is ideal for:
 
 [Dataflow Pipeline Architecture](https://drive.google.com/file/d/1QGmuwqxD3UBUQJ5AgricvbpJedL0bALR/view?usp=sharing)
 
-![Pipeline Diagram](assets/architecture design.png)
+![Pipeline Diagram](assets/architecture_design.png)
 
 
 ### GCP Layers
@@ -29,7 +29,7 @@ This project is ideal for:
 **GCS**
 - Raw layer of data, accepts any input as long as it is a valid csv
 
-***BQ Schema Layers**
+**BQ Schema Layers**
 
 - **Staging**  
   Contains raw, valid data ingested directly from the pipeline.
@@ -216,43 +216,43 @@ Costs for Pipeline (with small usage): Negligable
 
 ## Visual Run Example
 
-![csv upload example](assets/csv upload example.png)
+![csv upload example](assets/csv_upload_example.png)
 
-![json upload example](assets/json upload example.png)
+![json upload example](assets/json_upload_example.png)
 
-![analysis upload eg](assets/analysis upload eg.png)
+![analysis upload eg](assets/analysis_upload_eg.png)
 
-![cleaning and testing upload example](assets/cleaning and testing upload example.png)
+![cleaning and testing upload example](assets/cleaning_and_testing_upload_example.png)
 
-![merging branch pr](assets/merging branch pr.png)
+![merging branch pr](assets/merging_branch_pr.png)
 
-![merged pr](assets/merged pr.png)
+![merged pr](assets/merged_pr.png)
 
-![github actions triggered](assets/github actions triggered.png)
+![github actions triggered](assets/github_actions_triggered.png)
 
-![gcs config upload](assets/gcs config upload.png)
+![gcs config upload](assets/gcs_config_upload.png)
 
-![gcs data upload](assets/gcs data upload.png)
+![gcs data upload](assets/gcs_data_upload.png)
 
-![gcs dataflow template upload](assets/gcs dataflow template upload.png)
+![gcs dataflow template upload](assets/gcs_dataflow_template_upload.png)
 
-![gcs schema upload](assets/gcs schema upload.png)
+![gcs schema upload](assets/gcs_schema_upload.png)
 
-![dataflow job triggered](assets/dataflow job triggered.png)
+![dataflow job triggered](assets/dataflow_job_triggered.png)
 
-![dataflow job completed](assets/dataflow job completed.png)
+![dataflow job completed](assets/dataflow_job_completed.png)
 
-![github actions completed](assets/github actions completed.png)
+![github actions completed](assets/github_actions_completed.png)
 
-![bq staging upload](assets/bq staging upload.png)
+![bq staging upload](assets/bq_staging_upload.png)
 
-![bq error hospital upload](assets/bq error hospital upload.png)
+![bq error hospital upload](assets/bq_error_hospital_upload.png)
 
-![bq curated upload](assets/bq curated upload.png)
+![bq curated upload](assets/bq_curated_upload.png)
 
-![bq analysis upload (customer monthly spend)](assets/bq analysis upload (customer monthly spend).png)
+![bq analysis upload (customer monthly spend)](assets/bq_analysis_upload_customer_monthly_spend.png)
 
-![bq analysis upload (top 5 pct customer)](assets/bq analysis upload (top 5 pct customer).png)
+![bq analysis upload (top 5 pct customer)](assets/bq_analysis_upload_top_5_pct.png)
 
 
 
