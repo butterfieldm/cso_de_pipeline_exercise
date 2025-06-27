@@ -4,6 +4,43 @@ This repository provides a simple fully automated end-to-end data ingestion and 
 
 Built using Infrastructure as Code (Terraform) and CI/CD (GitHub Actions), this system lets you ingest, validate, cleanse and analyse CSV data files by simply pushing them to the repository. Everything else — from infrastructure provisioning to data validation, loading, and BigQuery SQL processing — is handled automatically.
 
+## Contents
+
+- [Use Case](#use-case)
+- [High-Level Architecture](#high-level-architecture)
+  - [Pipeline Architecture](#pipeline-architecture)
+  - [GCP Layers](#gcp-layers)
+  - [Repository Structure](#repository-structure)
+  - [Repository Structure Detail](#repository-structure-detail)
+- [Run Guide](#run-guide)
+- [Process Flow](#process-flow)
+- [Visual Run Example](#visual-run-example)
+- [Assumptions](#assumptions)
+  - [Project Handling](#project-handling)
+  - [File Format and Naming](#file-format-and-naming)
+  - [Schema Validation](#schema-validation)
+  - [BigQuery Dataset Layers](#bigquery-dataset-layers)
+  - [Infrastructure Automation](#infrastructure-automation)
+  - [CI/CD Workflow](#cicd-workflow)
+  - [Resource Usage and Cost](#resource-usage-and-cost)
+  - [Security](#security)
+  - [Scalability](#scalability)
+  - [Extensibility](#extensibility)
+- [Future Improvements](#future-improvements)
+  - [Input Format Flexibility](#1-input-format-flexibility)
+  - [Schema Matching Improvements](#2-schema-matching-improvements)
+  - [Validation Enhancements](#3-validation-enhancements)
+  - [Monitoring and Alerting](#4-monitoring-and-alerting)
+  - [Reporting](#5-reporting)
+  - [Storage and Triggering Enhancements](#6-storage-and-triggering-enhancements)
+  - [Deployment and Documentation](#7-deployment-and-documentation)
+  - [Orchestration & Workflow Management](#8-orchestration--workflow-management)
+  - [Scalability & Cost Optimization](#9-scalability--cost-optimization)
+  - [User Experience & Extensibility](#10-user-experience--extensibility)
+- [Alternative Tooling](#alternative-tooling)
+- [Additional Documentation](#additional-documentation)
+
+
 
 ## Use Case
 
@@ -44,42 +81,41 @@ This project is ideal for:
 ### Repository Structure:
 
 <pre><code>
-├── assets
-│   ├── picture1
-│   └── picture2
-│   └── etc....
-├── Dockerfile
-├── README.md
-├── data
-│   ├── customers.csv
-│   └── transactions.csv
-├── functions
-│   ├── main.py
-│   └── requirements.txt
-├── gcp-terraform
-│   ├── function-source.zip
-│   ├── main.tf
-│   ├── outputs.tf
-│   ├── terraform.tfstate
-│   ├── terraform.tfstate.1750358483.backup
-│   ├── terraform.tfstate.1750358491.backup
-│   ├── terraform.tfstate.backup
-│   ├── terraform.tfvars
-│   └── variables.tf
-├── mappings.yaml
-├── metadata.json
-├── pipelines
-│   └── cso_dataflow_pipeline.py
-├── schemas
-│   ├── customers_schema.json
-│   └── transactions_schema.json
-└── sql
-    ├── analysis
-    │   ├── customer_monthly_spend.sql
-    │   └── top_5_pct_lifetime_value.sql
-    └── clean_and_test
-        ├── customers.sql
-        └── transactions.sql
+├── assets                                # Static assets like images, logos, etc.
+│   ├── picture1                          # Example image file
+│   └── picture2                          # Another example image file
+│   └── etc....                           # More asset files
+├── Dockerfile                            # Docker configuration for containerizing the app
+├── README.md                             # Project documentation and instructions
+├── data                                  # Raw CSV data files for ingestion
+│   ├── customers.csv                     # Sample customer data
+│   └── transactions.csv                  # Sample transaction data
+├── functions                             # Cloud Functions source code and dependencies
+│   ├── main.py                           # Main function script (e.g., trigger or processing logic)
+│   └── requirements.txt                  # Python dependencies for the function
+├── gcp-terraform                         # Terraform scripts for provisioning GCP infrastructure
+│   ├── function-source.zip               # Zipped source for Cloud Functions deployment
+│   ├── main.tf                           # Main Terraform configuration file
+│   ├── outputs.tf                        # Terraform outputs definitions
+│   ├── terraform.tfstate                 # Terraform state file (tracks deployed resources)
+│   ├── terraform.tfstate.*.backup        # Backups of the state file
+│   ├── terraform.tfvars                  # Variable values for Terraform
+│   └── variables.tf                      # Terraform variables definitions
+├── mappings.yaml                         # Configuration file for data mappings (optional/custom)
+├── metadata.json                         # Metadata related to datasets or project config
+├── pipelines                             # Data pipelines code (e.g., Apache Beam / Dataflow)
+│   └── cso_dataflow_pipeline.py          # Python script for the Dataflow pipeline
+├── schemas                               # JSON schema files defining the structure of CSV data
+│   ├── customers_schema.json             # Schema for customers.csv
+│   └── transactions_schema.json          # Schema for transactions.csv
+└── sql                                   # SQL scripts for cleaning, testing, and analysis
+    ├── analysis                          # Analysis queries run after data ingestion
+    │   ├── customer_monthly_spend.sql    # Monthly spend by customer
+    │   └── top_5_pct_lifetime_value.sql  # Top 5% customers by lifetime value
+    └── clean_and_test                    # SQL scripts for data cleaning and validation
+        ├── customers.sql                 # Cleaning/testing for customer data
+        └── transactions.sql              # Cleaning/testing for transactions data
+
 </code></pre>
 
 
@@ -166,25 +202,24 @@ This project is ideal for:
 
 **If only wanting to create an analysis view then skip to step 5**
 
-**Naming convention of the files must be consistent throughout eg: customers.cvs/customers.json/customers.sql**
+**Naming convention of the files must be consistent throughout eg: customers.csv/customers.json/customers.sql**
 
-1) User clones the repo
+1) Clone this repository.
 
-2) User creates a feature branch off main
+2) Create a feature branch from main.
 
-3) User adds a csv to data/ to be pushed through the pipeline 
+3) Add your CSV file(s) to the data/ directory.
 
-4) User adds a corresponding schema to validate the csv added to schemas/
+4) Add matching JSON schema(s) to schemas/.
 
-5) User adds a .sql script to clean_and_test if the data needs to eventually land in the curated layer 
+5) (Optional) Add SQL cleaning scripts to sql/clean_and_test/.
 
-    (skip if it only needs to land in the staging area)
+6) Add infrastructure changes to gcp-terraform/ if needed.
 
-6) User adds any infrastructure required to main.tf (this would be controlled at an organisation)
+7) (Optional) Add SQL analysis queries to sql/analysis/.
 
-7) If a user wants to add an analysis view/materialised view/table then add a .sql file to sql/analysis
+8) Merge your branch into main to trigger the GitHub Actions pipeline.
 
-7) User then pushes the feature branch to main triggering the github action sequence
 
 
 ## Process Flow
@@ -199,7 +234,7 @@ Costs for Pipeline (with small usage): Negligable
 - Authenticates to GCP
 - Sets up Google Cloud CLI
 - Packages Cloud Function
-- Sets Ap Terraform
+- Sets Apply Terraform
 - Initialises & Applys Terraform Deploying GCP Infrastructure
 - Builds & Pushes Flex Template Image
 - Creates Flex Template JSON
@@ -350,7 +385,7 @@ This project is built with several assumptions to simplify design and deployment
 -**Explore an approach to ingress data from various source**
   Extend the ingress capabilities from local files, in a productionised capacity everything should be in gcs.
 -**Improve file naming**
-  Explore concatenating the date to make file names unqiue.
+  Explore concatenating the date to make file names unique.
 
 
 ### 2. Schema Matching Improvements
@@ -366,7 +401,7 @@ This project is built with several assumptions to simplify design and deployment
 - **Advanced schema features**  
   Add support for regex patterns, enums, minimum/maximum values, and other JSON Schema validations.
 - **Data summaries and quality checks**  
-  For testing purposes in production summary data cand data quality checks should be taken of the data.
+  For testing purposes in production summary data and data quality checks should be taken of the data.
 - **Mapping documentation**  
   Create mapping documents with a full picture of the data landscape.
 
@@ -384,7 +419,7 @@ This project is built with several assumptions to simplify design and deployment
 - **Dashboards**  
   Integrate with Looker Studio or another BI tool to visualize ingested data and metrics.
 - **Integrating GenAI**
-  Integrate google's Gemini into Looker to generate dashboards, reccomend insights, summarise trend and derive narratives from the data.
+  Integrate google's Gemini into Looker to generate dashboards, reccommend insights, summarise trend and derive narratives from the data.
 
 
 ### 6. Storage and Triggering Enhancements
@@ -400,10 +435,10 @@ This project is built with several assumptions to simplify design and deployment
 ### 7. Deployment and Documentation
 
 - **More robust documentation**  
-  Utilise sites like confulence to properly document the pipeline thoroughly for reusability. 
+  Utilise sites like confluence to properly document the pipeline thoroughly for reusability. 
 - **Mapping and lineage documents**  
   Include source-to-target data mapping documents and data lineage overviews.
-- **Templated repo setup**  
+- **Templated repository setup**  
   Provide a script or GitHub template repo to easily bootstrap a new ingestion project.
 
 
