@@ -428,6 +428,29 @@ This project is built with several assumptions to simplify design and deployment
 - Provide audit logging and compliance reports.
 
 
+
+## Alternative Tooling
+
+### ETL Engine
+- Cloud Composer (Airflow) could have been explored if scheduling was required.
+- Dataproc (Spark) could have been explored if larger quantities of data were used for faster/scalable processing.
+- Cloud Run could have been explored if microservice based API ingestion required.
+- Dataform or dbt could have been explored for SQL-based data modelling.
+
+**Ultimately, Dataflow was the best fit because**
+
+- It’s serverless and horizontally scalable out of the box.
+- It handles complex validation and routing logic (valid vs invalid records).
+- It integrates tightly with GCS, BigQuery, and Pub/Sub.
+- It supports batch and streaming, giving future flexibility.
+- The cost scales with usage and remains at 0 when idle.
+- It works well with Flex Templates, so the pipeline can be parameterized and reused for multiple datasets.
+- Cloud Composer has too high of an overhead for a simple ingestion.
+- Dataproc isn't serverless and requires cluster management.
+- Dataform isn't as useful for validation of raw data prior to BQ entry.
+
+
+
 ## Additional Documentation
 
 [Data Dictionary](https://docs.google.com/spreadsheets/d/1TDQT-YCTws1CYmgt0EbepnbJ7Hlk-mMC_npQRJcBcQo/edit?usp=sharing)
