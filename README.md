@@ -21,7 +21,7 @@ This project is ideal for:
 
 [Dataflow Pipeline Architecture](https://drive.google.com/file/d/1QGmuwqxD3UBUQJ5AgricvbpJedL0bALR/view?usp=sharing)
 
-![Pipeline Diagram](assets/architecture_design.png)
+![Dataflow Pipeline Diagram](assets/architecture_design.png)
 
 
 ### GCP Layers
