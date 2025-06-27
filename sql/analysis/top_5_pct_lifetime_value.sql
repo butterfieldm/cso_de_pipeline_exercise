@@ -18,4 +18,4 @@ SELECT
   c.lifetime_value
 FROM ranked_customers c
 WHERE c.percentile = 1
-ORDER BY c.lifetime_value DESC;
+;
