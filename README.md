@@ -429,4 +429,4 @@ This project is built with several assumptions to simplify design and deployment
 
 ## Additional Documentation
 
-[Data Dictionary: ](https://docs.google.com/spreadsheets/d/1TDQT-YCTws1CYmgt0EbepnbJ7Hlk-mMC_npQRJcBcQo/edit?usp=sharing)
+[Data Dictionary](https://docs.google.com/spreadsheets/d/1TDQT-YCTws1CYmgt0EbepnbJ7Hlk-mMC_npQRJcBcQo/edit?usp=sharing)
