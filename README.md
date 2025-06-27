@@ -42,9 +42,13 @@ This project is ideal for:
 
 
 ### Repository Structure:
+Got it! Here's your exact directory structure formatted cleanly for Markdown using a code block. This keeps your original indentation and layout exactly as you pasted it:
+
+<pre><code>
 ├── assets
 │   ├── picture1
 │   └── picture2
+│   └── etc....
 ├── Dockerfile
 ├── README.md
 ├── data
@@ -77,6 +81,8 @@ This project is ideal for:
     └── clean_and_test
         ├── customers.sql
         └── transactions.sql
+</code></pre>
+
 
 ### Repository Structure Detail
 
