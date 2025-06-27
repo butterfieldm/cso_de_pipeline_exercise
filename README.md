@@ -18,14 +18,18 @@ This project is ideal for:
 ## High-Level Architecture
 
 ### Pipeline Architecture 
-draw.io needs adding here
+
+[Dataflow Pipeline Architecture](https://drive.google.com/file/d/1QGmuwqxD3UBUQJ5AgricvbpJedL0bALR/view?usp=sharing)
+
+![Pipeline Diagram](assets/architecture_design.png)
+
 
 ### GCP Layers
 
 **GCS**
 - Raw layer of data, accepts any input as long as it is a valid csv
 
-***BQ Schema Layers**
+**BQ Schema Layers**
 
 - **Staging**  
   Contains raw, valid data ingested directly from the pipeline.
@@ -38,9 +42,12 @@ draw.io needs adding here
 
 
 ### Repository Structure:
+
+<pre><code>
 ├── assets
 │   ├── picture1
 │   └── picture2
+│   └── etc....
 ├── Dockerfile
 ├── README.md
 ├── data
@@ -73,6 +80,8 @@ draw.io needs adding here
     └── clean_and_test
         ├── customers.sql
         └── transactions.sql
+</code></pre>
+
 
 ### Repository Structure Detail
 
@@ -92,7 +101,7 @@ draw.io needs adding here
 
 #### assets/ - Process Pictures 
 
-- Pictures detailing the process flow for ReadME purposes
+- Pictures detailing the process flow for ReadME purposes.
 
 #### data/ — Input Files
 
@@ -142,7 +151,7 @@ draw.io needs adding here
   - Perform basic data integrity checks (e.g., nulls, duplicates)  
   - Prepares data for curation
 
-  eg: customers.sql / transactions.sql: Cleaning logic specific to each entity
+  eg: customers.sql / transactions.sql: Cleaning logic specific to each entity.
 
 - analysis/  
   Analytical SQL scripts to extract business insights after the data is curated
@@ -154,7 +163,9 @@ draw.io needs adding here
 ## Run Guide
 
 **If using the full pipeline moving data from a local source to BQ then start at step 1**
+
 **If only wanting to create an analysis view then skip to step 5**
+
 **Naming convention of the files must be consistent throughout eg: customers.cvs/customers.json/customers.sql**
 
 1) User clones the repo
@@ -204,6 +215,48 @@ Costs for Pipeline (with small usage): Negligable
 - Job Completes 
 
 
+## Visual Run Example
+
+![csv upload example](assets/csv_upload_example.png)
+
+![json upload example](assets/json_upload_example.png)
+
+![analysis upload eg](assets/analysis_upload_eg.png)
+
+![cleaning and testing upload example](assets/cleaning_and_testing_upload_example.png)
+
+![merging branch pr](assets/merging_branch_pr.png)
+
+![merged pr](assets/merged_pr.png)
+
+![github actions triggered](assets/github_actions_triggered.png)
+
+![gcs config upload](assets/gcs_config_upload.png)
+
+![gcs data upload](assets/gcs_data_upload.png)
+
+![gcs dataflow template upload](assets/gcs_dataflow_template_upload.png)
+
+![gcs schema upload](assets/gcs_schema_upload.png)
+
+![dataflow job triggered](assets/dataflow_job_triggered.png)
+
+![dataflow job completed](assets/dataflow_job_completed.png)
+
+![github actions completed](assets/github_actions_completed.png)
+
+![bq staging upload](assets/bq_staging_upload.png)
+
+![bq error hospital upload](assets/bq_error_hospital_upload.png)
+
+![bq curated upload](assets/bq_curated_upload.png)
+
+![bq analysis upload (customer monthly spend)](assets/bq_analysis_upload_customer_monthly_spend.png)
+
+![bq analysis upload (top 5 pct customer)](assets/bq_analysis_upload_top_5_pct.png)
+
+
+
 ## Assumptions
 
 This project is built with several assumptions to simplify design and deployment. Understanding these will help determine whether the pipeline suits a project's needs or whether further modifications are required.
@@ -211,9 +264,9 @@ This project is built with several assumptions to simplify design and deployment
 ### Project Handling
 
 - **Running the project**
-  This project was ran by a single engineer, testing was limited to that one person. In a real environment thorough peer reviews and testing would be required
+  This project was ran by a single engineer, testing was limited to that one person. In a real environment thorough peer reviews and testing would be required.
 - **Pull Requests**
-  Pull requests are automatically merged to main, in a proper environment, main should be protected and a secondary feature branch should be used to push changes to for running the pipeline
+  Pull requests are automatically merged to main, in a proper environment, main should be protected and a secondary feature branch should be used to push changes to for running the pipeline.
 
 
 ### File Format and Naming
@@ -234,19 +287,19 @@ This project is built with several assumptions to simplify design and deployment
 - JSON schema files define required fields, data types, and formats.
 - Validation occurs within the Dataflow pipeline before loading data into BigQuery.
 - Records that fail validation are redirected to a separate error hospital table.
-- Each Schema is user generated so isn't automated to a standard process or procedure
+- Each Schema is user generated so isn't automated to a standard process or procedure.
 
 
 ### BigQuery Dataset Layers
 
 - **Staging**  
-  Contains valid data ingested directly from the pipeline with minimal cleansing and testing
+  Contains valid data ingested directly from the pipeline with minimal cleansing and testing.
 
 - **Error Hospital**  
   Stores invalid records along with detailed error messages.
 
 - **Curated (optional)**  
-  Contains the cleaned "Gold Layer" of data, a.k.a. analytically ready data
+  Contains the cleaned "Gold Layer" of data, a.k.a. analytically ready data.
 
 
 ### Infrastructure Automation
@@ -266,7 +319,7 @@ This project is built with several assumptions to simplify design and deployment
 - The pipeline is designed to be low-cost.
 - Dataflow jobs only run when new files are uploaded.
 - There are no continuously running or always-on components.
-- The process uses a batch pipeline to reduce costs
+- The process uses a batch pipeline to reduce costs.
 
 
 ### Security
@@ -295,9 +348,9 @@ This project is built with several assumptions to simplify design and deployment
 - **Automatic format detection**  
   Implement logic to detect the file type and route processing accordingly.
 -**Explore an approach to ingress data from various source**
-  Extend the ingress capabilities from local files, in a productionised capacity everything should be in gcs
+  Extend the ingress capabilities from local files, in a productionised capacity everything should be in gcs.
 -**Improve file naming**
-  Explore concatenating the date to make file names unqiue
+  Explore concatenating the date to make file names unqiue.
 
 
 ### 2. Schema Matching Improvements
@@ -313,9 +366,9 @@ This project is built with several assumptions to simplify design and deployment
 - **Advanced schema features**  
   Add support for regex patterns, enums, minimum/maximum values, and other JSON Schema validations.
 - **Data summaries and quality checks**  
-  For testing purposes in production summary data cand data quality checks should be taken of the data
+  For testing purposes in production summary data cand data quality checks should be taken of the data.
 - **Mapping documentation**  
-  Create mapping documents with a full picture of the data landscape
+  Create mapping documents with a full picture of the data landscape.
 
 
 ### 4. Monitoring and Alerting
@@ -331,7 +384,7 @@ This project is built with several assumptions to simplify design and deployment
 - **Dashboards**  
   Integrate with Looker Studio or another BI tool to visualize ingested data and metrics.
 - **Integrating GenAI**
-  Integrate google's Gemini into Looker to generate dashboards, reccomend insights, summarise trend and derive narratives from the data
+  Integrate google's Gemini into Looker to generate dashboards, reccomend insights, summarise trend and derive narratives from the data.
 
 
 ### 6. Storage and Triggering Enhancements
@@ -347,7 +400,7 @@ This project is built with several assumptions to simplify design and deployment
 ### 7. Deployment and Documentation
 
 - **More robust documentation**  
-  Utilise sites like confulence to properly document the pipeline thoroughly for reusability 
+  Utilise sites like confulence to properly document the pipeline thoroughly for reusability. 
 - **Mapping and lineage documents**  
   Include source-to-target data mapping documents and data lineage overviews.
 - **Templated repo setup**  
@@ -371,10 +424,10 @@ This project is built with several assumptions to simplify design and deployment
 
 - **Improving the experience of the user and growth of the product**
 - Build a web interface or CLI tool to upload CSVs and schemas, monitor pipeline status, and visualize errors.
-- Implement multiple environments for dev,uat and production
+- Implement multiple environments for dev,uat and production.
 - Provide audit logging and compliance reports.
 
 
 ## Additional Documentation
 
-[Data Dictionary: ](https://docs.google.com/spreadsheets/d/1TDQT-YCTws1CYmgt0EbepnbJ7Hlk-mMC_npQRJcBcQo/edit?usp=sharing)
+[Data Dictionary](https://docs.google.com/spreadsheets/d/1TDQT-YCTws1CYmgt0EbepnbJ7Hlk-mMC_npQRJcBcQo/edit?usp=sharing)
