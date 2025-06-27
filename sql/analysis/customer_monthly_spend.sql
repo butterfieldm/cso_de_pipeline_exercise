@@ -11,4 +11,4 @@ FROM `cso-deng-pipeline.cso_exercise_bq_curated.transactions` a
 LEFT JOIN `cso-deng-pipeline.cso_exercise_bq_curated.customers` b
     ON a.customer_id=b.customer_id
 GROUP BY customer_id, full_name, month_date
-ORDER BY customer_id, month_date;
+ORDER BY customer_id;
