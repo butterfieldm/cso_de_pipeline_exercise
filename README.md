@@ -18,7 +18,11 @@ This project is ideal for:
 ## High-Level Architecture
 
 ### Pipeline Architecture 
-draw.io needs adding here
+
+[Dataflow Pipeline Architecture](https://drive.google.com/file/d/1QGmuwqxD3UBUQJ5AgricvbpJedL0bALR/view?usp=sharing)
+
+![Pipeline Diagram](assets/architecture design.png)
+
 
 ### GCP Layers
 
@@ -202,6 +206,48 @@ Costs for Pipeline (with small usage): Negligable
 - Runs Cleaning and Testing SQL Scripts
 - Runs Analysis SQL Scripts
 - Job Completes 
+
+
+## Visual Run Example
+
+![csv upload example](assets/csv upload example.png)
+
+![json upload example](assets/json upload example.png)
+
+![analysis upload eg](assets/analysis upload eg.png)
+
+![cleaning and testing upload example](assets/cleaning and testing upload example.png)
+
+![merging branch pr](assets/merging branch pr.png)
+
+![merged pr](assets/merged pr.png)
+
+![github actions triggered](assets/github actions triggered.png)
+
+![gcs config upload](assets/gcs config upload.png)
+
+![gcs data upload](assets/gcs data upload.png)
+
+![gcs dataflow template upload](assets/gcs dataflow template upload.png)
+
+![gcs schema upload](assets/gcs schema upload.png)
+
+![dataflow job triggered](assets/dataflow job triggered.png)
+
+![dataflow job completed](assets/dataflow job completed.png)
+
+![github actions completed](assets/github actions completed.png)
+
+![bq staging upload](assets/bq staging upload.png)
+
+![bq error hospital upload](assets/bq error hospital upload.png)
+
+![bq curated upload](assets/bq curated upload.png)
+
+![bq analysis upload (customer monthly spend)](assets/bq analysis upload (customer monthly spend).png)
+
+![bq analysis upload (top 5 pct customer)](assets/bq analysis upload (top 5 pct customer).png)
+
 
 
 ## Assumptions
