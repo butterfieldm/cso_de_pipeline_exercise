@@ -472,7 +472,7 @@ This project is built with several assumptions to simplify design and deployment
 - Cloud Run could have been explored if microservice based API ingestion required.
 - Dataform or dbt could have been explored for SQL-based data modelling.
 
-**Ultimately, Dataflow was the best fit because**
+**Ultimately, Dataflow was the best fit because:**
 
 - It’s serverless and horizontally scalable out of the box.
 - It handles complex validation and routing logic (valid vs invalid records).
